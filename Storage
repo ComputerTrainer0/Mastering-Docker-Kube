@@ -1,1 +1,48 @@
+Example 1:
+docker run -it --name example1 --rm centos
 
+====================
+Example 2 - Volume
+docker volume create vol
+docker volume ls
+docker volume inspect vol
+docker run -it --name example2 --rm -v  vol1:/app/data/ centos
+docker rm 
+docker run -it --name example2 --mount source=vol1,target=/app/data/ centos
+docker volume rm vol
+
+====================
+Example 3 - Bind Mount
+docker volume ls
+docker run -it --name=example3 --rm -v /opt/software/EAR/:/app/data/ centos
+docker inspect example3
+docker rm example3
+docker run -it --name example3 --mount type=bind,source=/opt/software/EAR/,target=/app/data/ centos
+
+====================
+Example 4 -  Dynamic volume creation & using Exsitng Data using Volumes
+docker volume ls
+docker run -d --name example4 -v vol:/app/data/ nginx
+docker run -d --name example4_1 -v vol:/app/data/ nginx
+docker run -d --name example4_2 --mount source=vol,target=/app/data/ nginx
+docker volume rm vol
+docker rm example4 example4_1 example4_2
+
+#nginx Document Root: /usr/share/nginx/html/
+====================
+Example 5 - Sharing data in Read Only
+docker volume ls
+docker run -d --name example5 -p 80:80 -v vol:/usr/share/nginx/:ro nginx
+docker run -d --name example5_1 -p 82:80 --mount source=vol,target=/app/data/,readonly nginx
+docker volume rm vol
+docker rm example5 example5_1
+
+====================
+index.html
+
+<HTML>
+<body bgcolor=red><br>
+Hello welcome to example.COM<br><br>
+Click <a href="https://www.example.com/snoop/"> here </a> to get redirected
+</body>
+</HTML>
