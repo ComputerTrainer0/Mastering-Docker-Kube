@@ -2,12 +2,25 @@ Basic commands:
 
 ifconfig
 docker network ls
+iptables -L -t nat -a
 
+===================
 Bridge Networking:
 docker inspect bridge
+docker run -it -d --name nginx_1 --net=bridge --mount type=bind,source=/opt/content/html/nginx_1/,target=/usr/share/nginx/html,ro -P nginx
+docker run -it -d --name nginx_2 --net=bridge --mount type=bind,source=/opt/content/html/nginx_2/,target=/usr/share/nginx/html,ro -P nginx
+docker inspect nginx_1
+docker inspect nginx_2
 
+docker stop nginx_1 nginx_2 
+docker rm nginx_1 nginx_2 
 
-
+===================
+Host Networking:
+docker inspect host
+docker run -it -d --name nginx_1 --net=host --mount type=bind,source=/opt/content/html/nginx_1/,target=/usr/share/nginx/html,ro -P nginx
+docker run -it -d --name nginx_2 --net=host --mount type=bind,source=/opt/content/html/nginx_2/,target=/usr/share/nginx/html,ro -P nginx
+docker inspect nginx_1
 
 ===================
 Supporting Files:
