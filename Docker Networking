@@ -2,7 +2,7 @@ Basic commands:
 
 ifconfig
 docker network ls
-iptables -L -t nat -a
+iptables -L -t nat -n
 
 ===================
 Bridge Networking:
