@@ -22,7 +22,6 @@ docker run -it -d --name nginx_1 --net=host --mount type=bind,source=/opt/conten
 docker run -it -d --name nginx_2 --net=host --mount type=bind,source=/opt/content/html/nginx_2/,target=/usr/share/nginx/html,ro -P nginx
 docker inspect nginx_1
 
-
 ===================
 None Network:
 docker run -it --name centos1 --net=none centos
@@ -35,6 +34,25 @@ docker image ls
 docker run -d --name http1 --net=bridge -P httpd
 docker run -it --name centos1 --net=container:http1 centos
 iptables -L -t nat -n
+
+
+====================
+Option 1:
+docker network create --driver bridge APP1NET
+docker inspect APP1NET
+docker run -d --name httpd1 --net APP1NET -P httpd
+docker run -it --name centos1 --net APP1NET centos bash
+docker run -it --name centos2 centos bash
+
+Option 2:
+docker network create --driver bridge --subnet "172.20.0.0/16" APP1NET
+docker run -d --name httpd1 --net APP1NET -P httpd
+docker network ls
+
+Option 3:
+docker network create --driver bridge APP1NET
+docker run -d --name httpd1 --net APP1NET -P httpd
+docker run -it --name centos1 --net container:httpd1 centos
 
 ==================
 Removing Containers easy:
