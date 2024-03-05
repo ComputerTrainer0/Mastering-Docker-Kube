@@ -22,6 +22,24 @@ docker run -it -d --name nginx_1 --net=host --mount type=bind,source=/opt/conten
 docker run -it -d --name nginx_2 --net=host --mount type=bind,source=/opt/content/html/nginx_2/,target=/usr/share/nginx/html,ro -P nginx
 docker inspect nginx_1
 
+
+===================
+None Network:
+docker run -it --name centos1 --net=none centos
+
+===================
+Same Namespace Container Network Mode:
+
+docker network ls
+docker image ls
+docker run -d --name http1 --net=bridge -P httpd
+docker run -it --name centos1 --net=container:http1 centos
+iptables -L -t nat -n
+
+==================
+Removing Containers easy:
+for i in `docker container ls -aq`; do docker stop $i && docker rm $i; done
+
 ===================
 Supporting Files:
 
