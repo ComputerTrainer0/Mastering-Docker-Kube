@@ -1,0 +1,32 @@
+#Setting Up Infra for Docker Swarm
+
+ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+ sudo docker install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+  vi /etc/hosts
+    10.0.15.133 master 
+    10.0.15.134 slave1
+    10.0.15.135 slave2
+  
+#Creation Of master and integration with Slaves
+
+ docker swarm init--advertise-addr 10.0.15.133
+ docker node ls
+ docker swarm join-token worker
+ firewall-cmd --zone=public --add-port=2377/tcp --permanent
+ firewall-cmd --reload
+
+#Creating Replicas
+
+ docker service create -p 80:80 --name NGINX_REPLICA --replicas 3 nginx
+ docker service ls
+ docker service ps NGINX_REPLICA
+ docker service scale NGINX_REPLICA=6
+ docker service rm NGINX_REPLICA
+
+#Slave Only containers
+
+  docker node update --label-add type=slave <node-id>
+  docker node inspect jheyniuz0aubu4r8gxfis7nls
+  docker service create --name APACHE_R1 --replicas 2 --constraint 'node.labels.type == slave' -p 80:80 httpd
+
+  
