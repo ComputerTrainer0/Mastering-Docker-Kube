@@ -1,15 +1,25 @@
 #Setting Up Infra for Docker Swarm
 
  sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
- sudo docker install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+ sudo yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
   vi /etc/hosts
-    10.0.15.133 master 
-    10.0.15.134 slave1
-    10.0.15.135 slave2
+   172.24.0.200 manager1.kube.com manager1
+   172.24.0.201 worker1.kube.com worker1
+   172.24.0.202 worker2.kube.com worker2
+
+To Setup Network On Slave:
+nmcli devices
+vi /etc/NetworkManager/system-connections/ens34.nmconnection
+  <Change the IP>
+nmcli connection modify ens34 ipv4.addresses 172.24.0.202/16
+nmcli connection modify ens34 ipv4.method manual
+nmcli device down ens34
+nmcli device up ens34
+
   
 #Creation Of master and integration with Slaves
 
- docker swarm init--advertise-addr 10.0.15.133
+ docker swarm init--advertise-addr 172.24.0.200
  docker node ls
  docker swarm join-token worker
  firewall-cmd --zone=public --add-port=2377/tcp --permanent
