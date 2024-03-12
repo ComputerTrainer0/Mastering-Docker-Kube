@@ -1,1 +1,63 @@
 
+#For Loop For Deleting Pods:
+for i in `kubectl get --no-headers=true pods -o name |awk -F "/" '{print $2}'`; do kubectl delete pods $i; done
+
+Part 1: CLI POD Creation
+
+kubectl run web1 --image=httpd --restart=Never
+kubectl get pods
+kubectl get pods -o wide
+wget http://<IP>
+curl http://<IP>
+kubectl exec -it web1 bash
+cd htdocs/
+vi index.html
+  what ever i want
+kubectl describe nodes
+
+kubectl run centos1 --image=centos --restart=Never --rm -it sh
+kubectl run centos1 --image=centos --restart=Never -- sh -c 'echo pause this pod; sleep 8000'
+kubectl get pods
+#use the for loop to delete the pods
+
+Part 2: Using Label on CLI
+
+kubectl run web1 --image=httpd --restart=Never --labels="app=apacheHTTP"
+kubectl get pods --show-labels
+
+kubectl run web2 --image=httpd --restart=Never --labels="app=apacheHTTP,env=production"
+kubectl get pods --show-labels
+kubectl get pods -l app=apacheHTTP --show-labels
+kubectl get pods -l env=production --show-labels
+
+kubectl run web3 --image=httpd --restart=Never --labels="app=apacheHTTP,env=development"
+kubectl get pods --show-labels
+kubectl get pods -l app=apacheHTTP,env=production --show-labels
+kubectl get pods -l app=apacheHTTP,env!=development --show-labels
+Other Advaned Option:
+kubectl get pods -l 'app=apacheHTTP' --selector='env=production'
+#DONT DELETE THE PODS
+
+Part 2: Adding & Remove Labels For both CLI and YAML
+
+kubectl label pod web1 app=apacheHTTP env=development
+kubectl label pod web1 app=apacheHTTP env=production --overwirte
+kubectl label pod web1 env-
+kubectl label pod web1 app-
+
+#Delete the pods using the for loop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
