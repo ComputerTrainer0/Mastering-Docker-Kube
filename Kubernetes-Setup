@@ -1,0 +1,57 @@
+vi /etc/hosts
+   172.24.0.200 manager1.kube.com manager1
+   172.24.0.201 worker1.kube.com worker1
+   172.24.0.202 worker2.kube.com worker2
+
+Ping manager1.kube.com
+vi /etc/fstab
+swapoff -a
+swapon -s
+
+cat > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
+
+yum -y install kubelet kubeadm kubectl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl start docker
+systemctl enable docker
+systemctl start kubelet
+systemctl enable kubelet
+
+containerd config default | tee /etc/containerd/config.toml
+vi /etc/containerd/config.toml
+Update ->     SystemdCgroup = true
+
+kubeadm init --apiserver-advertise-address=172.24.0.200 --pod-network-cidr=10.244.0.0/16
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+Disable Firewall:
+
+   89  systemctl disable firewalld
+   90  systemctl stop firewalld
+   91  iptables -F
+   92  iptables-save
+
+
+wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl apply -f kube-flannel.yml
+
+kubeadm token create --print-join-command
+
+kubectl get nodes
+kubectl get pods --all-namespaces / -A
+
+
+########### Uninstallation of Kubernetes docker and containerd. Please remember this is the last workaround option.
+ 	systemctl restart containerd kubelet docker
+	systemctl disable containerd kubelet docker
+	sudo killall kube-apiserver kube-controller-manager  kube-proxy kube-scheduler etcd containerd containerd-shim-runc-v2 dockerd cri-o
+	sudo yum -y remove kubelet kubeadm kubectl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+	sudo rm -rf /var/lib/etcd/ /etc/kubernetes/ /var/lib/kubelet/ /var/log/containers/ ~/.kube/* /var/log/containers/ 
+  #### If you get errors as device is used when you do rm -rf. Reboot the system and remove.
+	sudo reboot
