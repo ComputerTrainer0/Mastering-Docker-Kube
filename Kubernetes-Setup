@@ -30,14 +30,6 @@ kubeadm init --apiserver-advertise-address=172.24.0.200 --pod-network-cidr=10.24
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
 
-Disable Firewall:
-
-   89  systemctl disable firewalld
-   90  systemctl stop firewalld
-   91  iptables -F
-   92  iptables-save
-
-
 wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 kubectl apply -f kube-flannel.yml
 
