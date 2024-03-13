@@ -47,12 +47,59 @@ kubectl label pod web1 app-
 
 #Delete the pods using the for loop.
 
+mkdir /opt/software/pods/
+
+=========
+vi basic1.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
 
 
+=========
 
+vi basic2.yaml
 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tomcat-http-pod
+spec:
+  containers:
+    - name: tomcat-container
+      image: tomcat:latest
+      ports:
+        - containerPort: 8080
+    - name: http-container
+      image: httpd:latest
+      ports:
+        - containerPort: 80
 
+=========
+kubectl exec -it -c http-container tomcat-http-pod bash
 
+=========
+
+vi basic3.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod-2
+spec:
+  containers:
+    - name: my-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
 
 
 
