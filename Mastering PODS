@@ -97,14 +97,104 @@ metadata:
 spec:
   containers:
     - name: my-container
-      image: nginx:latest
-      ports:
-        - containerPort: 80
+      image: centos:latest
+      command: ["sleep", "2000"]
 
 
+==========
 
+vi advanced1.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-tomcat-pod
+  labels:
+    env: production
+spec:
+  containers:
+  - name: http-container
+    image: httpd:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80
+  - name: tomcat-container
+    image: tomcat:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8080
+  
 
+==================
 
+vi advanced2.yaml
 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-tomcat-pod
+  labels:
+    env: production
+spec:
+  containers:
+  - name: http-container
+    image: httpd:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80
+      hostPort: 80
+  - name: tomcat-container
+    image: tomcat:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
 
+==================
 
+vi advanced3.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-tomcat-pod-external1
+  labels:
+    env: production
+spec:
+  containers:
+  - name: http-container
+    image: httpd:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80
+      hostPort: 80
+  - name: tomcat-container
+    image: tomcat:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+
+==================
+
+vi advanced4.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-tomcat-pod-external2
+  labels:
+    env: production
+spec:
+  containers:
+  - name: http-container
+    image: httpd:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80
+      hostPort: 80
+  - name: tomcat-container
+    image: tomcat:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
