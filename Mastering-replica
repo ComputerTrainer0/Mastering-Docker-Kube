@@ -1,0 +1,234 @@
+
+#For Loop For Deleting Pods:
+for i in `kubectl get --no-headers=true pods -o name |awk -F "/" '{print $2}'`; do kubectl delete pods $i; done
+
+
+Part 1: Creating basic Replicas using Match Label
+
+==========================
+basic1-rs.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        env: development
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+==========================
+
+kubectl get pods -o wide
+kubectl get rs
+kubectl get pods --show-lables
+kubectl describe rs/nginx-replicaset
+
+
+Part 2: Creating advanced Replicas using Match Label
+
+kubectl get pods -o wide
+kubectl get rs
+kubectl get pods --show-lables
+kubectl describe rs/nginx-replicaset
+
+==========================
+advanced1-rs.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: multi-container-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: multi-container
+  template:
+    metadata:
+      labels:
+        app: multi-container
+        env: development
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+      - name: busybox-container
+        image: busybox:latest
+        command: ["sleep", "3600"]
+==========================
+
+
+Part 3:  Scaling Up your replicas
+
+vi basic1-rs.yaml
+--update   replicas: 6
+:wq
+
+kubectl get pods -o wide
+kubectl get rs
+kubectl get pods --show-lables
+kubectl describe rs/nginx-replicaset
+
+#Another way to scale your replicas
+kubectl scale rs nginx-replicaset --replicas=3
+
+kubectl get pods -o wide
+kubectl get rs
+
+Part 4: Replica set with match Expressions
+
+vi matchEx1.yaml
+==========================
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+
+==========================
+
+vi matchEx2.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: complex-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+    - key: tier
+      operator: In
+      values:
+      - frontend
+      - backend
+    - key: release
+      operator: NotIn
+      values:
+      - beta
+    - key: app
+      operator: Exists
+    - key: team
+      operator: DoesNotExist
+  template:
+    metadata:
+      labels:
+        app: my-app
+        tier: frontend
+        release: stable
+        team: dev
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+      - name: busybox
+        image: busybox:latest
+        command: ["sleep", "3600"]
+
+==========================
+
+vi matchExLA1.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+    matchExpressions:
+    - key: environment
+      operator: In
+      values:
+      - production
+      - staging
+    - key: team
+      operator: NotIn
+      values:
+      - ops
+  template:
+    metadata:
+      labels:
+        app: nginx
+        environment: production
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+=================
+
+
+Part 5: Advanced Replica set operations - Trying to break replica set
+
+#removing a pod from the replicaset hosted service
+kubectl get pods --show-labels 
+kubectl delete pod/<PODNAME>
+kubectl get pods --show-labels 
+kubectl describe rs/nginx-replicaset
+
+#removing the label name of the pod which was used by replica set
+kubectl get pods --show-labels 
+kubectl label pod <PODNAME> app-
+kubectl get pods --show-labels 
+kubectl describe rs/nginx-replicaset
+
+#readding the label name of the pod which was used by replica set
+kubectl get pods --show-labels 
+kubectl label pod <PODNAME> app=nginx
+kubectl get pods --show-labels 
+kubectl describe rs/nginx-replicaset
+
+#Manually Adding Pods with the name of the label which replica set is managing
+kubectl describe rs/nginx-replicaset
+kubectl run webserver --image=nginx --label=app=nginx --restart=Never
+kubectl describe rs/nginx-replicaset
+
+#remvoing & Recreating replicaset without deleting the pods
+kubectl delete rs nginx-replicaset --cascade=false
+kubectl get pods --show-labels 
+kubectl apply -f basic1-rs.yaml
+kubectl delete rs nginx-replicaset --cascade=true
+
+
+
+Part 6: Advanced Replica set expression - Trying to break replica set
+
+
+
+
+
