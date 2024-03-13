@@ -40,7 +40,7 @@ Part 2: Creating advanced Replicas using Match Label
 
 kubectl get pods -o wide
 kubectl get rs
-kubectl get pods --show-lables
+kubectl get pods --show-labels
 kubectl describe rs/nginx-replicaset
 
 ==========================
@@ -80,7 +80,7 @@ vi basic1-rs.yaml
 
 kubectl get pods -o wide
 kubectl get rs
-kubectl get pods --show-lables
+kubectl get pods --show-labels
 kubectl describe rs/nginx-replicaset
 
 #Another way to scale your replicas
@@ -88,6 +88,8 @@ kubectl scale rs nginx-replicaset --replicas=3
 
 kubectl get pods -o wide
 kubectl get rs
+
+
 
 Part 4: Replica set with match Expressions
 
@@ -196,15 +198,15 @@ spec:
 Part 5: Advanced Replica set operations - Trying to break replica set
 
 #removing a pod from the replicaset hosted service
-kubectl get pods --show-labels 
+kubectl get pods --show-labels
 kubectl delete pod/<PODNAME>
-kubectl get pods --show-labels 
+kubectl get pods --show-labels
 kubectl describe rs/nginx-replicaset
 
 #removing the label name of the pod which was used by replica set
-kubectl get pods --show-labels 
+kubectl get pods --show-labels
 kubectl label pod <PODNAME> app-
-kubectl get pods --show-labels 
+kubectl get pods --show-labels
 kubectl describe rs/nginx-replicaset
 
 #readding the label name of the pod which was used by replica set
