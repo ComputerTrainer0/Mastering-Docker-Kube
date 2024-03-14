@@ -1,4 +1,7 @@
 
+#For Loop for delete RS:
+for i in `kubectl get --no-headers=true rs -o name | awk -F "/" '{print $2}'`; do kubectl delete rs $i; done
+
 #For Loop For Deleting Pods:
 for i in `kubectl get --no-headers=true pods -o name |awk -F "/" '{print $2}'`; do kubectl delete pods $i; done
 
@@ -93,32 +96,9 @@ kubectl get rs
 
 Part 4: Replica set with match Expressions
 
+==========================
+
 vi matchEx1.yaml
-==========================
-apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: nginx-replicaset
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:latest
-        ports:
-        - containerPort: 80
-
-
-==========================
-
-vi matchEx2.yaml
 
 apiVersion: apps/v1
 kind: ReplicaSet
@@ -160,7 +140,7 @@ spec:
 
 ==========================
 
-vi matchExLA1.yaml
+vi matchExLa1.yaml
 
 apiVersion: apps/v1
 kind: ReplicaSet
@@ -217,20 +197,24 @@ kubectl describe rs/nginx-replicaset
 
 #Manually Adding Pods with the name of the label which replica set is managing
 kubectl describe rs/nginx-replicaset
-kubectl run webserver --image=nginx --label=app=nginx --restart=Never
+kubectl run webserver --image=nginx --labels=app=nginx --restart=Never
 kubectl describe rs/nginx-replicaset
 
 #remvoing & Recreating replicaset without deleting the pods
 kubectl delete rs nginx-replicaset --cascade=false
 kubectl get pods --show-labels 
 kubectl apply -f basic1-rs.yaml
-kubectl delete rs nginx-replicaset --cascade=true
+kubectl delete rs nginx-replicaset --cascade=background
 
 
 
 Part 6: Advanced Replica set expression - Trying to break replica set
 
-
+kubectl get rs -o wide
+kubectl run web1 --image=nginx --labels="app=abc,release=beta,tier=backend"
+kubectl run web2 --image=nginx --labels="app=abc,release=something,tier=backend"
+kubectl run web2 --image=nginx --labels="app=abc,release=something,tier=backend,team=dev"
+kubectl get rs -o wide
 
 
 
