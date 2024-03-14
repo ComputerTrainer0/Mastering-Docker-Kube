@@ -217,4 +217,49 @@ kubectl run web2 --image=nginx --labels="app=abc,release=something,tier=backend,
 kubectl get rs -o wide
 
 
+Part 7: Double Trouble - Creating Multi Level templates
 
+===========
+vi doubletrouble.yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: staging-replicaset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      environment: staging
+  template:
+    metadata:
+      labels:
+        environment: staging
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: production-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      environment: production
+  template:
+    metadata:
+      labels:
+        environment: production
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+================
+
+Remove all the replica set using the for loop. Thanks.
