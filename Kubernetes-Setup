@@ -26,6 +26,10 @@ containerd config default | tee /etc/containerd/config.toml
 vi /etc/containerd/config.toml
 Update ->     SystemdCgroup = true
 
+systemctl restart docker
+systemctl restart containerd
+systemctl restart kubelet.service
+
 kubeadm init --apiserver-advertise-address=172.24.0.200 --pod-network-cidr=10.244.0.0/16
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
