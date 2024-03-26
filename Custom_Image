@@ -1,4 +1,4 @@
-
+# Pushing Image with versioning.
 
 mkdir -p /opt/software/custom_image/v1
 mkdir -p /opt/software/custom_image/v2
@@ -17,8 +17,59 @@ Hello welcome to nginx Version 1 <br><br>
 </body>
 </HTML>
 
+docker login 
 docker image build -t nginx:v1 .
 docker image tag nginx:v1 beyondcloudai/nginx:v1
 docker push beyondcloudai/nginx:v1
 
 
+# For version 2
+
+cd /opt/software/custom_image/v2
+
+vi Dockerfile
+FROM nginx
+COPY index_v2.html /usr/share/nginx/html/index.html
+
+vi index_v2.html
+<HTML>
+<body bgcolor=orange><br>
+Hello welcome to nginx Version 2 <br><br>
+</body>
+</HTML>
+
+docker image build -t nginx:v2 .
+docker image tag nginx:v2 beyondcloudai/nginx:v2
+docker push beyondcloudai/nginx:v2
+
+
+# For version 3
+cd /opt/software/custom_image/v3
+
+vi Dockerfile
+FROM nginx
+COPY index_v3.html /usr/share/nginx/html/index.html
+
+vi index_v3.html
+<HTML>
+<body bgcolor=green><br>
+Hello welcome to nginx Version 3 <br><br>
+</body>
+</HTML>
+
+docker image build -t nginx:v3 .
+docker image tag nginx:v3 beyondcloudai/nginx:v3
+docker push beyondcloudai/nginx:v3
+
+#alternative:
+docker image build -t beyondcloudai/nginx:v1 .
+docker push beyondcloudai/nginx:v1
+
+
+# Pulling Image
+
+docker search beyondcloudai/nginx
+docker pull beyondcloudai/nginx:v1
+docker image ls
+docker rmi beyondcloudai/nginx:v1
+docker run -d beyondcloudai/nginx:v1
