@@ -7,7 +7,7 @@ mkdir -p /opt/software/custom_image/v3
 cd /opt/software/custom_image/v1
 
 vi Dockerfile
-FROM ngnix
+FROM nginx
 COPY index_v1.html /usr/share/nginx/html/index.html
 
 vi index_v1.html
@@ -16,3 +16,9 @@ vi index_v1.html
 Hello welcome to nginx Version 1 <br><br>
 </body>
 </HTML>
+
+docker image build -t nginx:v1 .
+docker image tag nginx:v1 beyondcloudai/nginx:v1
+docker push beyondcloudai/nginx:v1
+
+
