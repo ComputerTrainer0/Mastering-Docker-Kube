@@ -1,0 +1,18 @@
+
+
+mkdir -p /opt/software/custom_image/v1
+mkdir -p /opt/software/custom_image/v2
+mkdir -p /opt/software/custom_image/v3
+
+cd /opt/software/custom_image/v1
+
+vi Dockerfile
+FROM ngnix
+COPY index_v1.html /usr/share/nginx/html/index.html
+
+vi index_v1.html
+<HTML>
+<body bgcolor=blue><br>
+Hello welcome to nginx Version 1 <br><br>
+</body>
+</HTML>
