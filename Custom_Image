@@ -73,3 +73,12 @@ docker pull beyondcloudai/nginx:v1
 docker image ls
 docker rmi beyondcloudai/nginx:v1
 docker run -d beyondcloudai/nginx:v1
+
+
+
+# Using these Images on Kube
+kubectl run nginxv1 --image=beyondcloudai/nginx:v1 --port=80 --restart=Never
+kubectl run nginxv2 --image=beyondcloudai/nginx:v2 --port=80 --restart=Never
+kubectl run nginxv3 --image=beyondcloudai/nginx:v3 --port=80 --restart=Never
+
+
