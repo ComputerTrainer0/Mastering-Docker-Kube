@@ -20,6 +20,7 @@ spec:
         image: nginx:latest
         ports:
         - containerPort: 80
+:wq
 
 kubectl create -f deployment-simple1.yaml
 kubectl get deployment/http-server-deployment
@@ -88,6 +89,7 @@ spec:
         image: beyondcloudai/nginx:v1
         ports:
         - containerPort: 80
+:wq
 
 kubectl apply -f  Sterling-ru-prod-web-deploy.yaml
 kubectl describe pod/sterling-ru-prod-web-deploy-7686d7b79d-fgf27
@@ -140,15 +142,137 @@ kubectl rollout undo deployment sterling-ru-prod-web-deploy
 kubectl delete deployment sterling-ru-prod-web-deploy
 
 =============
-Part 7: 
+Part 7: Recreate / Fixed Update
 
+vi sterling-fu-prod-web-deploy.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-fu-prod-web-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        version: v1
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+
+:wq
+
+kubectl apply -f  sterling-fu-prod-web-deploy
+kubectl describe pod/sterling-fu-prod-web-deploy-7686d7b79d-fgf27
+kubectl describe rs/sterling-fu-prod-web-deploy-7686d7b79d
+kubectl describe deployment/sterling-fu-prod-web-deploy
+kubectl rollout status deployment sterling-fu-prod-web-deploy
+kubectl rollout history deployment sterling-fu-prod-web-deploy
+
+=============
+Part 8: Fixed Update Version 2
+
+vi sterling-fu-prod-web-deploy.yaml
+
+        version: v2
+        image: beyo2ndcloudai/nginx:v2
+:wq
+
+kubectl describe pod/sterling-fu-prod-web-deploy-7686d7b79d-fgf27
+kubectl describe rs/sterling-fu-prod-web-deploy-7686d7b79d
+kubectl describe deployment/sterling-fu-prod-web-deploy
+kubectl rollout status deployment sterling-fu-prod-web-deploy
+kubectl rollout history deployment sterling-fu-prod-web-deploy
+
+=============
+Part 8:1 - Troubleshooting Readyness probe
+
+Multiple changes in the configuration files. Please refer the video as well as the commands executed is below.
+
+  839  vi sterling-fu-prod-web-deploy.yaml
+  840  kubectl apply -f  sterling-fu-prod-web-deploy.yaml
+  841  kubectl describe pods sterling-fu-prod-web-deploy-7cfdfc4475-b9hc5
+  842  kubectl delete deployment sterling-fu-prod-web-deploy
+  843  vi sterling-fu-prod-web-deploy.yaml
+  844  kubectl apply -f  sterling-fu-prod-web-deploy.yaml
+  845  vi sterling-fu-prod-web-deploy.yaml
+  846  kubectl apply -f  sterling-fu-prod-web-deploy.yaml
+  847  kubectl describe pods sterling-fu-prod-web-deploy-69c5c48467-gjv9w
+  848  kubectl delete deployment sterling-fu-prod-web-deploy
 
 
 =============
-Part 8: 
+Part 9: Service Load balaner
 
+vi sterling-lb-prod-svc.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sterling-lb-prod-svc
+spec:
+  selector:
+    app: sterling
+    env: production
+    server: web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
+
+kubectl apply -f sterling-lb-prod-svc.yaml
+kubectl get svc/sterling-lb-prod-svc
+kubectl get endpoints/sterling-lb-prod-svc
+kubectl describe service/sterling-lb-prod-svc
+kubectl describe ep/sterling-lb-prod-svc
 
 
 =============
-Part 9: 
+Part 10:
 
+
+=============
+Part 10:
+
+
+=============
+Part 10:
+
+
+=============
+Part 10:
+
+
+=============
+Part 10:
+
+
+=============
+Part 10:
