@@ -1,0 +1,154 @@
+Part 1: Basic Deployments
+
+vi deployment-simple1.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      containers:
+      - name: http-server
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+kubectl create -f deployment-simple1.yaml
+kubectl get deployment/http-server-deployment
+kubectl get rs
+kubectl get pods -o wide
+kubectl describe deployment/http-server-deployment
+kubectl describe rs/http-server-deployment-764c5897d9
+
+=============
+
+Part 2: Scaling Your deployments
+
+vi deployment-simple1.yaml
+--update   replicas: 4
+:wq
+kubectl apply -f deployment-simple1.yaml
+
+kubectl get pods -o wide
+kubectl get rs
+kubectl get pods --show-labels
+kubectl describe deployment/http-server-deployment
+kubectl describe rs/http-server-deployment-764c5897d9
+
+#Another way to scale your replicas But useless in deployments
+kubectl scale deployment http-server-deployment-764c5897d9 --replicas=2 # Not possible to change.
+
+kubectl get pods -o wide
+kubectl get rs
+
+=============
+
+Part 3: Rolling Update Version 1
+
+vi Sterling-ru-prod-web-deploy.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-ru-prod-web-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        version: v1
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+
+kubectl apply -f  Sterling-ru-prod-web-deploy.yaml
+kubectl describe pod/sterling-ru-prod-web-deploy-7686d7b79d-fgf27
+kubectl describe rs/sterling-ru-prod-web-deploy-7686d7b79d
+kubectl describe deployment/sterling-ru-prod-web-deploy
+
+#For Loop For validating website in each pod
+
+for i in `kubectl get pod -o wide --no-headers=true |awk '{print $6}'`; do echo "$i"; wget -qO- $i | sed -e 's/<[^>]*>//g'; done
+
+
+=============
+
+Part 4: Updating the deployment to version 2
+
+vi Sterling-ru-prod-web-deploy.yaml
+#2 changes needs to be made
+        version: v2
+
+        image: beyondcloudai/nginx:v2
+:wq
+
+kubectl apply -f  Sterling-ru-prod-web-deploy.yaml
+
+kubectl rollout status deployment sterling-ru-prod-web-deploy
+kubectl rollout history deployment sterling-ru-prod-web-deploy
+
+
+=============
+
+Part 5: Upgrading to Version 3
+
+vi Sterling-ru-prod-web-deploy.yaml
+
+      maxUnavailable: 0
+      maxSurge: 2
+        version: v3
+        image: beyondcloudai/nginx:v3
+:wq
+
+kubectl apply -f  Sterling-ru-prod-web-deploy.yaml
+kubectl rollout status deployment sterling-ru-prod-web-deploy
+kubectl rollout history deployment sterling-ru-prod-web-deploy
+
+=============
+Part 6: Rollback / Backout to previous version
+
+
+kubectl rollout undo deployment sterling-ru-prod-web-deploy
+kubectl delete deployment sterling-ru-prod-web-deploy
+
+=============
+Part 7: 
+
+
+
+=============
+Part 8: 
+
+
+
+=============
+Part 9: 
+
