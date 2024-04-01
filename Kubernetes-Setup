@@ -17,25 +17,24 @@ gpgcheck=1
 gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
 
 yum -y install kubelet kubeadm kubectl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-systemctl start docker
-systemctl enable docker
-systemctl start kubelet
-systemctl enable kubelet
 
 containerd config default | tee /etc/containerd/config.toml
 vi /etc/containerd/config.toml
 Update ->     SystemdCgroup = true
 
-systemctl restart docker
-systemctl restart containerd
-systemctl restart kubelet.service
+
+systemctl start docker
+systemctl enable docker
+systemctl start kubelet
+systemctl enable kubelet
 
 kubeadm init --apiserver-advertise-address=172.24.0.200 --pod-network-cidr=10.244.0.0/16
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
 
+mkdir /opt/software ;; cd /opt/software/
 wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-kubectl apply -f kube-flannel.yml
+kubectl apply -f /opt/software/kube-flannel.yml
 
 kubeadm token create --print-join-command
 
