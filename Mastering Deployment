@@ -255,24 +255,244 @@ kubectl describe ep/sterling-lb-prod-svc
 
 
 =============
-Part 10:
+Part 10: Blue & Green Deployment
+
+vi sterling-b-prod-web-deploy.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-b-prod-web-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+      method: blue
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        method: blue
+        version: v1
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+      restartPolicy: Always
+:wq
+
+vi sterling-g-prod-web-deploy.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-g-prod-web-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+      method: green
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        method: green
+        version: v2
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v2
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+      restartPolicy: Always
+:wq
+
+# service deployment pointing to Blue
+
+vi sterling-lb-bg-svc.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sterling-lb-svc
+spec:
+  selector:
+    app: sterling
+    env: production
+    server: web
+    method: blue
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
+
 
 
 =============
-Part 10:
+Part 11: Blue to green switch
+
+# service deployment pointing to green from blue
+
+vi sterling-lb-bg-svc.yaml
+#update the follwoing on the existing file
+    method: green
+:wq
 
 
 =============
-Part 10:
+Part 12: Canary Deployment
 
+vi sterling-c-prod-web-deploy.yaml
 
-=============
-Part 10:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-c-prod-web-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+      method: canary-stable
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        method: canary-stable
+        version: v1
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+      restartPolicy: Always
+:wq
 
+vi sterling-cn-prod-web-deploy.yaml
 
-=============
-Part 10:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-cn-prod-web-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+      method: canary-new
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        method: canary-new
+        version: v2
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v2
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+      restartPolicy: Always
+:wq
 
+vi sterling-lb-c-svc.yaml
 
-=============
-Part 10:
+apiVersion: v1
+kind: Service
+metadata:
+  name: sterling-lb-svc
+spec:
+  selector:
+    app: sterling
+    env: production
+    server: web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+:wq
