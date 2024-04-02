@@ -1,0 +1,119 @@
+#Part 1: Complicating Readiness Probes
+
+vi sterling-prod-probe1.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-prod-probe1
+spec:
+  replicas: 3  # Specifies the desired number of replicas
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+    # Specifies how Pods should be selected for the Deployment based on labels
+  strategy:
+    type: Recreate  # Specifies the update strategy for the Deployment
+  minReadySeconds: 5  # Specifies the minimum number of seconds for a Pod to be ready
+  paused: false  # Specifies whether the Deployment is paused
+  progressDeadlineSeconds: 600  # Specifies the maximum time for the Deployment to make progress before considered failed
+  revisionHistoryLimit: 10  # Specifies the number of old ReplicaSets to retain for rollback
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        version: v1
+    # Specifies labels for Pods created by the Deployment
+    spec:
+      containers:
+      - name: nginx
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+:wq
+
+#Deploy and test your pod by browing it locally using its IP.
+
+vi sterling1-lb-prod-p1-svc.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sterling-lb-svc
+spec:
+  selector:
+    app: sterling
+    env: production
+    server: web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
+#Deploy the service and test your pod by browing its cluster IP.
+
+
+#Part 2: Complicating Liveness Probe
+
+vi sterling-prod-probe2.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-prod-probe2
+spec:
+  replicas: 3  # Specifies the desired number of replicas
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+    # Specifies how Pods should be selected for the Deployment based on labels
+  strategy:
+    type: Recreate  # Specifies the update strategy for the Deployment
+  minReadySeconds: 5  # Specifies the minimum number of seconds for a Pod to be ready
+  paused: false  # Specifies whether the Deployment is paused
+  progressDeadlineSeconds: 600  # Specifies the maximum time for the Deployment to make progress before considered failed
+  revisionHistoryLimit: 10  # Specifies the number of old ReplicaSets to retain for rollback
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        version: v1
+    # Specifies labels for Pods created by the Deployment
+    spec:
+      containers:
+      - name: nginx
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+:wq
+
+# Readiness probe and liveness probe using TCP.
+
+
+# Readiness probe and liveness probe using exec.
+
+
