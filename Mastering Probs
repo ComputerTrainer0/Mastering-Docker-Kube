@@ -1,4 +1,5 @@
-#Part 1: Complicating Readiness Probes
+=====================
+# Part 1: Complicating Readiness Probes
 
 vi sterling-prod-probe1.yaml
 
@@ -65,8 +66,8 @@ spec:
 
 #Deploy the service and test your pod by browing its cluster IP.
 
-
-#Part 2: Complicating Liveness Probe
+=====================
+# Part 2: Complicating Liveness Probe
 
 vi sterling-prod-probe2.yaml
 
@@ -75,19 +76,18 @@ kind: Deployment
 metadata:
   name: sterling-prod-probe2
 spec:
-  replicas: 3  # Specifies the desired number of replicas
+  replicas: 3 
   selector:
     matchLabels:
       app: sterling
       env: production
       server: web
-    # Specifies how Pods should be selected for the Deployment based on labels
   strategy:
-    type: Recreate  # Specifies the update strategy for the Deployment
-  minReadySeconds: 5  # Specifies the minimum number of seconds for a Pod to be ready
-  paused: false  # Specifies whether the Deployment is paused
-  progressDeadlineSeconds: 600  # Specifies the maximum time for the Deployment to make progress before considered failed
-  revisionHistoryLimit: 10  # Specifies the number of old ReplicaSets to retain for rollback
+    type: Recreate 
+  minReadySeconds: 5  
+  paused: false  
+  progressDeadlineSeconds: 600 
+  revisionHistoryLimit: 10 
   template:
     metadata:
       labels:
@@ -95,7 +95,6 @@ spec:
         env: production
         server: web
         version: v1
-    # Specifies labels for Pods created by the Deployment
     spec:
       containers:
       - name: nginx
@@ -111,9 +110,203 @@ spec:
           failureThreshold: 3
 :wq
 
-# Readiness probe and liveness probe using TCP.
+=====================
+# Part 3: Readiness probe and liveness probe using TCP.
+
+vi sterling-prod-probe3.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    readinessProbe:
+      httpGet:
+      tcpSocket:
+        port: 80
+      initialDelaySeconds: 5
+      timeoutSeconds: 10
+      periodSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+    livenessProbe:
+      tcpSocket:
+        port: 80
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+      periodSeconds: 15
+      successThreshold: 1
+      failureThreshold: 3
+
+=====================
+# Part 4: Readiness probe and liveness probe using exec.
+
+vi sterling-prod-probe4.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    readinessProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -c
+        - /usr/bin/pgrep nginx
+      initialDelaySeconds: 5
+      timeoutSeconds: 10
+      periodSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+    livenessProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -c
+        - /usr/bin/pgrep nginx
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+      periodSeconds: 15
+      successThreshold: 1
+      failureThreshold: 3
+
+=====================
+# Part 4: Advanced Readiness probe with condition
+
+vi
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-db-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    readinessProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -c
+        - |
+          nc -z localhost 5432
+    # The readiness probe for the nginx container waits until the db container's port 5432 is reachable.
+
+  - name: db
+    image: postgres:latest
+    ports:
+    - containerPort: 5432
+
+=====================
+# Part 4: Advnced probes configuration
 
 
-# Readiness probe and liveness probe using exec.
+======================
+# Part : Advanced Rediness probe for hung thread deduction
 
+vi 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      containers:
+      - name: tomcat-container
+        image: tomcat:latest
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - curl -f http://localhost:8080/manager/jmxproxy/?get=Catalina:type=ThreadPool,name=\"http-nio-8080\" | grep maxThreads | grep -v maxThreads=200
+          initialDelaySeconds: 30
+          periodSeconds: 60
+
+
+======================
+# Part : Advanced Liveness probe for heap size check
+
+vi 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      containers:
+      - name: tomcat-container
+        image: tomcat:latest
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - java_pid=$(pgrep -f '.*java.*-Dcatalina.base=/usr/local/tomcat'); [ $(cat /proc/$java_pid/status | grep VmRSS | awk '{print $2}') -lt 20000000 ]
+          initialDelaySeconds: 30
+          periodSeconds: 60
+
+
+======================
+# Part : Advanced Liveness probe for database health
+
+vi 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql-container
+        image: mysql:latest
+        ports:
+        - containerPort: 3306
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - mysql -h localhost -u root -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1;"
+          initialDelaySeconds: 30
+          periodSeconds: 60
 
