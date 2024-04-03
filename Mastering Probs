@@ -118,13 +118,12 @@ vi sterling-prod-probe3.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mypod
+  name: sterling-prod-probe3
 spec:
   containers:
   - name: nginx
     image: nginx:latest
     readinessProbe:
-      httpGet:
       tcpSocket:
         port: 80
       initialDelaySeconds: 5
@@ -149,7 +148,7 @@ vi sterling-prod-probe4.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mypod
+  name: sterling-prod-probe4
 spec:
   containers:
   - name: nginx
@@ -177,19 +176,25 @@ spec:
       successThreshold: 1
       failureThreshold: 3
 
-=====================
-# Part 4: Advanced Readiness probe with condition
+Soulution:
 
-vi
+Update image to nginx:alpine
+Or
+Update your probes to check for the command exec output: nginx -t (remember this requires recreation of pod)
+
+=====================
+# Part 5: Advanced Readiness probe with condition
+
+vi sterling-prod-probe5.yaml
 
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx-db-pod
+  name: sterling-prod-probe5
 spec:
   containers:
-  - name: nginx
-    image: nginx:latest
+  - name: app-nginx
+    image: nginx:alpine
     ports:
     - containerPort: 80
     readinessProbe:
@@ -198,27 +203,53 @@ spec:
         - /bin/sh
         - -c
         - |
-          nc -z localhost 5432
+          nc -z localhost 8090
     # The readiness probe for the nginx container waits until the db container's port 5432 is reachable.
 
-  - name: db
-    image: postgres:latest
+  - name: app-tomcat
+    image: tomcat:latest
     ports:
-    - containerPort: 5432
+    - containerPort: 8080
+:wq
+
+
 
 =====================
-# Part 4: Advnced probes configuration
+# Part 6: Advnced probes configuration - Enterint different states
 
+vi sterling-prod-probe6.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sterling-prod-probe6
+spec:
+  containers:
+  - name: app-test 
+    image: busybox:latest
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/test; sleep 45; rm -rf /tmp/test; sleep 900
+    readinessProbe: 
+      exec:
+        command: ["test","-e","/tmp/test"]
+      initialDelaySeconds: 15
+      periodSeconds: 6
+      timeoutSeconds: 1
+      successThreshold: 1
+      failureThreshold: 3
+  restartPolicy: OnFailure
 
 ======================
-# Part : Advanced Rediness probe for hung thread deduction
+# Part 7: Advanced liveness probe for hung thread deduction
 
-vi 
+vi sterling-prod-probe7.yaml
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tomcat-deployment
+  name: sterling-prod-probe7
 spec:
   replicas: 1
   selector:
@@ -242,17 +273,17 @@ spec:
             - curl -f http://localhost:8080/manager/jmxproxy/?get=Catalina:type=ThreadPool,name=\"http-nio-8080\" | grep maxThreads | grep -v maxThreads=200
           initialDelaySeconds: 30
           periodSeconds: 60
-
+:wq
 
 ======================
-# Part : Advanced Liveness probe for heap size check
+# Part 8: Advanced Liveness probe for heap size check
 
-vi 
+vi sterling-prod-probe8.yaml
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tomcat-deployment
+  name: sterling-prod-probe8
 spec:
   replicas: 1
   selector:
@@ -276,10 +307,10 @@ spec:
             - java_pid=$(pgrep -f '.*java.*-Dcatalina.base=/usr/local/tomcat'); [ $(cat /proc/$java_pid/status | grep VmRSS | awk '{print $2}') -lt 20000000 ]
           initialDelaySeconds: 30
           periodSeconds: 60
-
+:wq
 
 ======================
-# Part : Advanced Liveness probe for database health
+# Part 9: Advanced Liveness probe for database health (pending)
 
 vi 
 apiVersion: apps/v1
