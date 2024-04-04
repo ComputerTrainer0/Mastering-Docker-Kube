@@ -133,3 +133,10 @@ spec:
 
 
 ========================
+Part 3: Clusterip / NodePort / LoadBalancer - Using CLI
+
+kubectl run nginx-cli1 --image=beyondcloudai/nginx:v1 --port=80 --restart=Never
+
+kubectl expose pod/nginx-cli1 --name nginx-svc-cls --port=80 --target-port=80 --type=ClusterIP
+kubectl expose pod/nginx-cli1 --name nginx-svc-np --port=80 --target-port=80 --type=NodePort
+kubectl expose pod/nginx-cli1 --name nginx-svc-lb --port=80 --target-port=80 --type=LoadBalancer
