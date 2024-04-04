@@ -1,0 +1,135 @@
+========================
+# Part 1: Clusterip / NodePort / LoadBalancer Service configuration
+
+vi sterling-fu-prod-web-deploy-v1.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-fu-prod-web-deploy-v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sterling
+      env: production
+      server: web
+  strategy:
+    type: Recreate
+  minReadySeconds: 5
+  paused: false
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        app: sterling
+        env: production
+        server: web
+        version: v1
+    spec:
+      containers:
+      - name: sterling-pod
+        image: beyondcloudai/nginx:v1
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+  :wq
+
+vi clusterip-svc1.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-1
+spec:
+  selector:
+    app: sterling
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+:wq
+
+vi nodeport-svc1.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-2
+spec:
+  selector:
+    app: sterling
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+:wq
+
+vi loadbalancer-svc1.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-3
+spec:
+  selector:
+    app: sterling
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+:wq
+
+# Apply all these services.
+
+
+========================
+# Part 2: External Name / HeadLess / Service without Selector Service configuration
+
+vi externalname-svc1.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-4
+spec:
+  type: ExternalName
+  externalName: example.com
+:wq
+
+vi headless-svc1.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-5
+spec:
+  clusterIP: None
+  selector:
+    app: sterling
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+:wq
+
+vi wihtoutselector-svc1.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-6
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+:wq
+
+
+========================
