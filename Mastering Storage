@@ -1,6 +1,7 @@
 ========================
 # Part 1: Understanding the exsiting pod's stroage
 
+kubectl run nginx-cli1 --image=beyondcloudai/nginx:v1 --port=80 --restart=Never
 kubectl get pods nginx-cli -o=jsonpath='{.metadata.uid}'
 
 
