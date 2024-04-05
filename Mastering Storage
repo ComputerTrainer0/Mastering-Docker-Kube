@@ -1,0 +1,8 @@
+========================
+# Part 1: Understanding the exsiting pod's stroage
+
+kubectl get pods nginx-cli -o=jsonpath='{.metadata.uid}'
+
+
+========================
+# Part 1: Understanding the exsiting pod's stroage
