@@ -6,4 +6,138 @@ kubectl get pods nginx-cli -o=jsonpath='{.metadata.uid}'
 
 
 ========================
-# Part 1: Understanding the exsiting pod's stroage
+# Part 2: Understanding the exsiting pod's stroage
+
+kubectl run nginx-cli --image=beyondcloudai/nginx:v1 --port=80 --restart=Never
+
+========================
+# Part 3: Understanding EmptyDir Storage
+
+vi storage-pod1.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: html
+    emptyDir: {}
+:wq
+
+
+========================
+# Part 4: Understanding HostPath (bind) Storage
+
+vi storage-pod2.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mycontainer
+    image: nginx
+    volumeMounts:
+    - name: host-volume
+      mountPath: /usr/share/nginx/html/  # Mount point inside the container
+  volumes:
+  - name: host-volume
+    hostPath:
+      path: /opt/software/content/html/  # Path on the host node's filesystem
+:wq
+
+
+========================
+# Part 5: Advanced EmptyDir Storage
+
+vi storage-pod3.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-sharing-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: shared-volume
+      mountPath: /nginx-data
+  - name: os-container
+    image: alpine
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: shared-volume
+      mountPath: /os-data
+  volumes:
+  - name: shared-volume
+    emptyDir: {}
+:wq
+
+
+========================
+# Part 6: Basic RW and RO Storage
+
+vi stroage-pod4.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-sharing-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: shared-volume
+      mountPath: /nginx-data
+      readOnly: true  # Set to true for read-only access
+  - name: os-container
+    image: alpine
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: shared-volume
+      mountPath: /os-data
+  volumes:
+  - name: shared-volume
+    emptyDir: {}
+:wq
+
+
+========================
+# Part 7: Advanced RW and RO Storage
+
+vi stroage-pod5.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-sharing-pod
+spec:
+  containers:
+  - name: os-container
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c","while true;do date >> /var/html/index.html; hostname >> /var/html/index.html; sleep 10;done"]
+    volumeMounts:
+    - name: shared-volume
+      mountPath: /var/html/
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: shared-volume
+      mountPath: /usr/share/nginx/html
+      readOnly: true  # Set to true for read-only access
+  volumes:
+  - name: shared-volume
+    emptyDir: {}
+:wq
+
