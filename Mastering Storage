@@ -10,6 +10,7 @@ kubectl get pods nginx-cli -o=jsonpath='{.metadata.uid}'
 
 kubectl run nginx-cli --image=beyondcloudai/nginx:v1 --port=80 --restart=Never
 
+
 ========================
 # Part 3: Understanding EmptyDir Storage
 
@@ -34,6 +35,11 @@ spec:
 
 ========================
 # Part 4: Understanding HostPath (bind) Storage
+
+[root@manager1 pods]# mkdir -p /opt/software/content/html/
+[root@manager1 pods]# cat > /opt/software/content/html/index.html
+this is pod2 example
+^D <To Quit Cat>
 
 vi storage-pod2.yaml
 
