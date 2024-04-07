@@ -164,7 +164,7 @@ exportfs -av
 
 #Check if its working with the below command on another node
 mount -t nfs manager1:/mnt/nfs /mnt/ -vvv
-
+chmod 777 /mnt/nfs -R # why this needs needs to be enabled or run is covered on the nfs with jenkins session.
 
 ========================
 # Part 8: Basic NFS Storage
@@ -244,4 +244,80 @@ spec:
 # Part 10: Persistant Volumes
 
 vi stroage-pod8.yaml
+
+Step 1:
+vi storage-pv1.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+  labels:
+    name: my-pv
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: "/mnt/pv"
+:wq
+
+
+Step 2:
+vi storage-pvc1.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
+  selector:
+    matchLabels:
+      name: my-pv
+:wq
+
+
+Step 3:
+
+vi storage-pod8.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app-container
+          image: nginx
+          volumeMounts:
+            - name: my-volume
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: my-volume
+          persistentVolumeClaim:
+            claimName: my-pvc
+:wq
+
+
+========================
+# Part 11: Persistant Volumes with NFS
+
+
 
