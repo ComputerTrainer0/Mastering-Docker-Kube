@@ -147,3 +147,101 @@ spec:
     emptyDir: {}
 :wq
 
+
+========================
+# Part 7: NFS Installation
+
+# install this on all the nodes
+yum -y install nfs-utils 
+
+#only on the nfs server
+vi /etc/exports
+/mnt/nfs/ 10.0.15.0/24(rw,sync,root_squash,no_subtree_check) 172.24.0.0/24(rw,sync,root_squash,no_subtree_check) 172.18.0.0/24(rw,sync,root_squash,no_subtree_check) 172.17.0.0/24(rw,sync,root_squash,no_subtree_check) 10.244.1.0/24(rw,sync,root_squash,no_subtree_check)
+:wq
+
+systemctl start nfs-server.service
+exportfs -av
+
+#Check if its working with the below command on another node
+mount -t nfs manager1:/mnt/nfs /mnt/ -vvv
+
+
+========================
+# Part 8: Basic NFS Storage
+
+vi stroage-pod6.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nfs-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: nfs-volume
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: nfs-volume
+    nfs:
+      server: nfs-server.example.com   # Replace with your NFS server address
+      path: /path/to/your/nfs/share    # Replace with the NFS share path
+:wq
+
+========================
+# Part 9: Advanced NFS Storage with Jenkins
+
+vi stroage-pod7.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 50000
+          name: jnlp
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-home
+        nfs:
+          server: nfs-server.example.com
+          path: /path/to/your/nfs/share
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+spec:
+  type: NodePort
+  selector:
+    app: jenkins
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30000  # Adjust the nodePort as needed
+    protocol: TCP
+:wq
+
+
+========================
+# Part 10: Persistant Volumes
+
+vi stroage-pod8.yaml
+
