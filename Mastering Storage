@@ -243,8 +243,6 @@ spec:
 ========================
 # Part 10: Persistant Volumes
 
-vi stroage-pod8.yaml
-
 Step 1:
 vi storage-pv1.yaml
 apiVersion: v1
@@ -319,5 +317,63 @@ spec:
 ========================
 # Part 11: Persistant Volumes with NFS
 
+Step 1:
+vi storage-pv2.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  nfs:
+    path: /path/to/nfs/share
+    server: nfs-server-ip
+:wq
 
+vi storage-pvc2.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: manual
+:wq
+
+vi storage-pod9.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-app
+  template:
+    metadata:
+      labels:
+        app: nfs-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        volumeMounts:
+        - name: nfs-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nfs-volume
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+:wq
 
