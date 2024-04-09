@@ -377,3 +377,114 @@ spec:
           claimName: nfs-pvc
 :wq
 
+========================
+# Part 12: Troubleing PV, PVC & Access Modes
+
+Step 1:
+vi storage-pv3.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  nfs:
+    path: /mnt/nfs
+    server: manager1.kube.com
+:wq
+
+Step 2: 
+
+vi storage-pvc3.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
+:wq
+
+Step 3:
+
+vi storage-pod10.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nfs-app
+  template:
+    metadata:
+      labels:
+        app: nfs-app
+    spec:
+      containers:
+      - name: os-container
+        image: alpine
+        command: ["/bin/sh"]
+        args: ["-c","while true;do date >> /var/html/index.html; hostname >> /var/html/index.html; sleep 10;done"]
+        volumeMounts:
+        - name: nfs-volume
+          mountPath: /var/html/
+        readinessProbe:
+          exec:
+            command: ["test","-e","/var/html/index.html"]
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+      - name: nginx
+        image: nginx:latest
+        volumeMounts:
+        - name: nfs-volume
+          mountPath: /usr/share/nginx/html
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: nfs-volume
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: NodePort
+  selector:
+    app: nfs-app
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30000  # Adjust the nodePort as needed
+    protocol: TCP
+
+:wq
