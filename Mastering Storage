@@ -586,6 +586,8 @@ spec:
       labels:
         app: nfs-client-provisioner
     spec:
+      nodeSelector:                    # Specify node selector here
+        kubernetes.io/hostname: manager1
       serviceAccountName: nfs-client-provisioner
       containers:
         - name: nfs-client-provisioner
