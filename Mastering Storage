@@ -492,19 +492,134 @@ spec:
 ========================
 # Part 13: Dynamic PersistantVolume
 
-Step 1:
+step 1: 
+
+vi rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nfs-client-provisioner-runner
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "update", "patch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: run-nfs-client-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: nfs-client-provisioner
+    # replace with namespace where provisioner is deployed
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: nfs-client-provisioner-runner
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: leader-locking-nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: leader-locking-nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: nfs-client-provisioner
+    # replace with namespace where provisioner is deployed
+    namespace: default
+roleRef:
+  kind: Role
+  name: leader-locking-nfs-client-provisioner
+  apiGroup: rbac.authorization.k8s.io
+:wq
+
+
+Step 2:
+
+vi storage-pr1.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner
+  labels:
+    app: nfs-client-provisioner
+  # replace with namespace where provisioner is deployed
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner
+          image: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.1
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: k8s-sigs.io/nfs-subdir-external-provisioner
+            - name: NFS_SERVER
+              value: manager1.kube.com
+            - name: NFS_PATH
+              value: /mnt/nfs
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: manager1.kube.com
+            path: /mnt/nfs
+:wq
+
+Step 3:
 
 vi storage-class1.yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: nfs-storage-class
-provisioner: my-nfs-provisioner
-parameters:
-  type: nfs
-  server: manager1.kube.com
-  path: /mnt/nfs
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
+allowVolumeExpansion: true
+reclaimPolicy: Retain
 :wq
+
+Step 4: 
 
 vi storage-pvc4.yaml
 apiVersion: v1
@@ -513,12 +628,14 @@ metadata:
   name: nfs-pvc
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   storageClassName: nfs-storage-class
   resources:
     requests:
       storage: 5Gi
 :wq
+
+Step 5:
 
 vi storage-pod11.yaml
 apiVersion: apps/v1
@@ -549,21 +666,20 @@ spec:
 
 
 ========================
-Part 14: Dynamic re-alignment
+Part 14: Advanced Dynamic PersistantVolume
 
 Step 1:
-
 
 vi storage-class2.yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: web-storage-class
-provisioner: my-web-provisioner
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
+allowVolumeExpansion: true
+reclaimPolicy: Delete
 parameters:
-  type: nfs
-  server: manager1.kube.com
-  path: /mnt/nfs/web
+  archiveOnDelete: "true"
 :wq
 
 
@@ -572,26 +688,9 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: app-storage-class
-provisioner: my-app-provisioner
-parameters:
-  type: nfs
-  server: manager1.kube.com
-  path: /mnt/nfs/app
-:wq
-
-
-vi storage-pvc5.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nfs-pvc
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: nfs-storage-class
-  resources:
-    requests:
-      storage: 5Gi
+provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
+allowVolumeExpansion: true
+reclaimPolicy: Retain
 :wq
 
 
@@ -606,7 +705,7 @@ spec:
   storageClassName: web-storage-class
   resources:
     requests:
-      storage: 100Mi
+      storage: 5Mi
 :wq
 
 
@@ -621,7 +720,7 @@ spec:
   storageClassName: app-storage-class
   resources:
     requests:
-      storage: 100Mi
+      storage: 50Mi
 :wq
 
 
@@ -721,5 +820,6 @@ spec:
     nodePort: 30000  # Adjust the nodePort as needed
     protocol: TCP
 
-
 :wq
+
+
