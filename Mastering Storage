@@ -488,3 +488,66 @@ spec:
     protocol: TCP
 
 :wq
+
+========================
+# Part 13: Dynamic PersistantVolume
+
+Step 1:
+
+vi storage-class1.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-storage-class
+provisioner: my-nfs-provisioner
+parameters:
+  type: nfs
+  server: <NFS_SERVER_IP_OR_HOSTNAME>
+  path: /exported/path
+:wq
+
+vi storage-pvc4.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-storage-class
+  resources:
+    requests:
+      storage: 5Gi
+:wq
+
+vi storage-pod10.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nfs-app
+  template:
+    metadata:
+      labels:
+        app: nfs-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        volumeMounts:
+        - name: nfs-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nfs-volume
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+:wq
+
+Part 14: Advanced Dynamic PersistantVolume
+
+Step 1:
+
