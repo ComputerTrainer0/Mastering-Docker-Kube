@@ -586,8 +586,6 @@ spec:
       labels:
         app: nfs-client-provisioner
     spec:
-      nodeSelector:                    # Specify node selector here
-        kubernetes.io/hostname: manager1
       serviceAccountName: nfs-client-provisioner
       containers:
         - name: nfs-client-provisioner
@@ -805,6 +803,21 @@ spec:
   - port: 80
     targetPort: 80
     nodePort: 30000  # Adjust the nodePort as needed
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service1
+spec:
+  type: NodePort
+  selector:
+    app: sterling-app
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30001  # Adjust the nodePort as needed
     protocol: TCP
 
 :wq
