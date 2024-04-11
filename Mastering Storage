@@ -722,11 +722,11 @@ spec:
   storageClassName: app-storage-class
   resources:
     requests:
-      storage: 50Mi
+      storage: 100Mi
 :wq
 
 
-vi storage-pod11.yaml
+vi storage-pod12.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -784,25 +784,10 @@ spec:
         volumeMounts:
         - name: app-volume
           mountPath: /usr/local/tomcat/webapps
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 3
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 3
       volumes:
       - name: web-volume
         persistentVolumeClaim:
           claimName: web-pvc
-      volumes:
       - name: app-volume
         persistentVolumeClaim:
           claimName: app-pvc
@@ -815,7 +800,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: nfs-app
+    app: sterling-app
   ports:
   - port: 80
     targetPort: 80
