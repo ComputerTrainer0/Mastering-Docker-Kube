@@ -1,0 +1,45 @@
+#ConfigMap
+
+#Pod1:
+
+vi configmap-pod1.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.4.0
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "demo_db1"
+        - name: MYSQL_DATABASE
+          value: "demo_db"
+        - name: MYSQL_USER
+          value: "demo_user"
+        - name: MYSQL_PASSWORD
+          value: "demo_db"
+:wq
+
+
+
+
+#
+
+kubectl create configmap my-config --from-literal=key1=value1 --from-literal=key2=value2
+
+
+
