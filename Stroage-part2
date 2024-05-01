@@ -33,13 +33,61 @@ spec:
         - name: MYSQL_PASSWORD
           value: "demo_db"
 :wq
+  
 
 
+#pod2
+
+kubectl create configmap my-config --from-literal=MYSQL_ROOT_PASSWORD=demo_db1 --from-literal=MYSQL_DATABASE=demo_db --from-literal=MYSQL_USER=demo_user --from-literal=MYSQL_PASSWORD=demo_db
+
+kubectl  get cm/my-config
+kubectl  describe cm/my-config
+kubectl  get cm/my-config -o yaml
 
 
-#
+vi configmap-pod2.yaml
 
-kubectl create configmap my-config --from-literal=key1=value1 --from-literal=key2=value2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.4.0
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - configMapRef:
+            name: my-config
+:wq
 
+Delete Configmap and Deployment
 
+#pod3
+
+vi configmap1.yaml
+
+apiVersion: v1
+data:
+  MYSQL_DATABASE: demo_db
+  MYSQL_PASSWORD: demo_db
+  MYSQL_ROOT_PASSWORD: demo_db1
+  MYSQL_USER: demo_user
+kind: ConfigMap
+metadata:
+  name: my-config
+:wq
+
+kubectl  apply -f configmap1.yaml
+kubectl  apply -f configmap-pod2.yaml
 
