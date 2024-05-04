@@ -43,7 +43,7 @@ kubectl create configmap my-config --from-literal=MYSQL_ROOT_PASSWORD=demo_db1 -
 kubectl  get cm/my-config
 kubectl  describe cm/my-config
 kubectl  get cm/my-config -o yaml
-
+kubectl edit cm/my-config 
 
 vi configmap-pod2.yaml
 
@@ -91,3 +91,75 @@ metadata:
 kubectl  apply -f configmap1.yaml
 kubectl  apply -f configmap-pod2.yaml
 
+
+#pod4
+
+vi configmap2.properties
+
+MYSQL_DATABASE=demo_db
+MYSQL_PASSWORD=demo_db
+MYSQL_ROOT_PASSWORD=demo_db1
+MYSQL_USER=demo_user
+:wq
+
+kubectl create configmap my-config --from-env-file=configmap2.properties
+kubectl  apply -f configmap-pod2.yaml
+
+#Pod5
+
+mkdir host_db_version
+
+vi configmap3.yaml
+
+apiVersion: v1
+data:
+  version.sh: |
+    #!/bin/bash
+    echo "Getting MYSQL Version..."
+    mysql -uroot -pdemo_db1 --version
+kind: ConfigMap
+metadata:
+  name: my-version
+:wq
+
+vi configmap-pod3.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.4.0
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - configMapRef:
+            name: my-config
+        volumeMounts:
+          - name: db-versions
+            mountPath: /mnt/
+          - name: db-version-script
+            mountPath: /var/tmp
+      volumes:
+        - name: db-versions
+          hostPath:
+            path: "/opt/software/storage/configmap/host_db_version"
+            type: DirectoryOrCreate
+        - name: db-version-script
+          configMap:
+            name: my-version
+            items:
+              - key: version.sh
+                path: mysql_version_script.sh
+:wq
