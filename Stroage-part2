@@ -147,12 +147,12 @@ spec:
         - configMapRef:
             name: my-config
         volumeMounts:
-          - name: db-versions
+          - name: db-versions-dir
             mountPath: /mnt/
           - name: db-version-script
             mountPath: /var/tmp
       volumes:
-        - name: db-versions
+        - name: db-versions-dir
           hostPath:
             path: "/opt/software/storage/configmap/host_db_version"
             type: DirectoryOrCreate
