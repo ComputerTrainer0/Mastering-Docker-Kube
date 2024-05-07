@@ -163,3 +163,159 @@ spec:
               - key: version.sh
                 path: mysql_version_script.sh
 :wq
+
+
+#Secret
+
+#pod1 
+
+kubectl create secret generic my-secret --from-literal=MYSQL_ROOT_PASSWORD=demo_db1 --from-literal=MYSQL_DATABASE=demo_db --from-literal=MYSQL_USER=demo_user --from-literal=MYSQL_PASSWORD=demo_db
+
+
+vi secret-pod1.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.4.0
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - secretRef:
+            name: my-secret
+:wq
+
+===========
+
+#pod 2:
+
+vi secret1.yaml
+
+apiVersion: v1
+data:
+  MYSQL_DATABASE: ZGVtb19kYg==
+  MYSQL_PASSWORD: ZGVtb19kYg==
+  MYSQL_ROOT_PASSWORD: ZGVtb19kYjE=
+  MYSQL_USER: ZGVtb191c2Vy
+kind: Secret
+metadata:
+  name: my-secret
+:wq
+
+kubectl apply -f secret1.yaml
+kubectl apply -f secret-pod1.yaml
+
+============
+
+
+#Pod 3:
+
+vi secret-pod2.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: centos-container
+    image: centos:latest
+    command: ["sleep", "3600"]  # Sleep for 1 hour (3600 seconds)
+    volumeMounts:
+    - name: secret-volume
+      mountPath: /var/tmp/my-secret
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: my-secret
+:wq
+
+
+============
+
+#pod 4:
+
+
+kubectl create secret docker-registry my-docker-registry --docker-server='https://index.docker.io/v1/' --docker-email=beyondcloudai@gmail.com --docker-username=beyondcloudai --docker-password=dckr_pat_8UmaoFWeV1Agrtt8wtm9wzCf2HM
+
+vi secret-pod3.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  imagePullSecrets:
+    - name: my-docker-registry
+  containers:
+  - name: centos-container
+    image: beyondcloudai/nginx:v1
+    imagePullPolicy: Always
+    volumeMounts:
+    - name: secret-volume
+      mountPath: /var/tmp/my-secret
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: my-secret
+:wq
+
+
+============
+
+#pod 5:
+
+vi secret2.yaml
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-docker-registry
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson:
+
+:wq
+
+echo -n '{"auths":{"your.docker.registry.url":{"username":"your-username","password":"your-password","email":"your-email@example.com","auth":"base64-encoded-credentials"}}}' | base64
+
+
+============
+
+#pod 6:
+
+
+vi configmap1.yaml
+
+apiVersion: v1
+data:
+  MYSQL_DATABASE: demo_db
+  MYSQL_USER: demo_user
+kind: ConfigMap
+metadata:
+  name: my-config
+:wq
+
+vi secret1.yaml
+
+apiVersion: v1
+data:
+  MYSQL_PASSWORD: ZGVtb19kYg==
+  MYSQL_ROOT_PASSWORD: ZGVtb19kYjE=
+kind: Secret
+metadata:
+  name: my-secret
+:wq
+
+vi secret-pod4.yaml
