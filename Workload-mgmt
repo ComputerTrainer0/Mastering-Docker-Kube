@@ -1,0 +1,203 @@
+# Workload Management - Resource Allocation
+
+#First Example
+  
+vi ww1.yaml
+
+  apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-nodename
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeName: worker1
+
+:wq
+
+#Second example
+  
+vi wm2.yaml
+
+  apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-nodeselector
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeSelector:
+    gpu: "true"
+
+:wq
+
+  
+==============
+
+#Workload Management - Horizontal Pod Autoscaler (HPA).
+
+vi wm3.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
+:wq
+
+
+vi wm4.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx:latest
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "5"
+            memory: "8Gi"  
+:wq
+
+  
+===================
+
+Workload Management - Horizontal Pod Autoscaler (HPA).
+
+
+vi wm5.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: http-app
+  template:
+    metadata:
+      labels:
+        app: http-app
+    spec:
+      containers:
+      - name: http-server
+        image: your-http-image:latest
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: http-app-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: http-app
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+:wq
+
+
+wm6.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: http-app
+  template:
+    metadata:
+      labels:
+        app: http-app
+    spec:
+      containers:
+      - name: http-server
+        image: your-http-image:latest
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: http-app-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: http-app
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageUtilization: 80
+
+:wq
+
+
+===================
+
+#
