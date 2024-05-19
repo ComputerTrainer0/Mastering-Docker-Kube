@@ -4,7 +4,7 @@
   
 vi ww1.yaml
 
-  apiVersion: v1
+apiVersion: v1
 kind: Pod
 metadata:
   name: pod-with-nodename
@@ -20,7 +20,7 @@ spec:
   
 vi wm2.yaml
 
-  apiVersion: v1
+apiVersion: v1
 kind: Pod
 metadata:
   name: pod-with-nodeselector
@@ -36,7 +36,7 @@ spec:
   
 ==============
 
-#Workload Management - Horizontal Pod Autoscaler (HPA).
+Workload Management - Resource Request & Limit
 
 vi wm3.yaml
 
@@ -88,8 +88,8 @@ spec:
         image: nginx:latest
         resources:
           limits:
-            cpu: "1"
-            memory: "512Mi"
+            cpu: "5"
+            memory: "8Gi"  
           requests:
             cpu: "5"
             memory: "8Gi"  
@@ -119,18 +119,18 @@ spec:
     spec:
       containers:
       - name: http-server
-        image: your-http-image:latest
+        image: wildfly
         ports:
         - containerPort: 80
         resources:
           limits:
-            cpu: "500m"
+            cpu: ".5"
             memory: "256Mi"
           requests:
-            cpu: "100m"
+            cpu: ".5"
             memory: "128Mi"
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: http-app-autoscaler
@@ -167,18 +167,18 @@ spec:
     spec:
       containers:
       - name: http-server
-        image: your-http-image:latest
+        image: wildfly
         ports:
         - containerPort: 80
         resources:
           limits:
-            cpu: "500m"
+            cpu: ".5"
             memory: "256Mi"
           requests:
-            cpu: "100m"
+            cpu: ".5"
             memory: "128Mi"
 ---
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: http-app-autoscaler
