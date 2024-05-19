@@ -100,104 +100,199 @@ spec:
 
 Workload Management - Horizontal Pod Autoscaler (HPA).
 
+#Command Based HPA
 
 vi wm5.yaml
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: http-app
+  name: php-apache
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      app: http-app
+      run: php-apache
   template:
     metadata:
       labels:
-        app: http-app
+        run: php-apache
     spec:
       containers:
-      - name: http-server
-        image: wildfly
+      - name: php-apache
+        image: registry.k8s.io/hpa-example
         ports:
         - containerPort: 80
         resources:
           limits:
-            cpu: ".5"
-            memory: "256Mi"
+            cpu: 500m
           requests:
-            cpu: ".5"
-            memory: "128Mi"
+            cpu: 200m
 ---
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
+apiVersion: v1
+kind: Service
 metadata:
-  name: http-app-autoscaler
+  name: php-apache
+  labels:
+    run: php-apache
 spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: http-app
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      targetAverageUtilization: 50
+  ports:
+  - port: 80
+  selector:
+    run: php-apache
 :wq
 
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
 
-wm6.yaml
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
+kubectl describe deployment/metrics-server -n kube-system
+kubectl describe pods/metrics-server-6d94bc8694-jp7lx -n kube-system
+kubectl logs pods/metrics-server-6d94bc8694-jp7lx -n kube-system
+
+kubectl delete -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+
+wget https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+add the follwoing line to components.yaml
+
+  - --kubelet-insecure-tls
+
+kubectl apply -f components.yaml
+kubectl describe deployment/metrics-server -n kube-system
+kubectl get pods -n kube-system
+
+kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+
+
+#YAML Based HPA
+
+vi wm6.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: http-app
+  name: php-apache
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      app: http-app
+      run: php-apache
   template:
     metadata:
       labels:
-        app: http-app
+        run: php-apache
     spec:
       containers:
-      - name: http-server
-        image: wildfly
+      - name: php-apache
+        image: registry.k8s.io/hpa-example
         ports:
         - containerPort: 80
         resources:
           limits:
-            cpu: ".5"
-            memory: "256Mi"
+          limits:
+            memory: "512Mi"
           requests:
-            cpu: ".5"
-            memory: "128Mi"
+            memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    run: php-apache
+spec:
+  ports:
+  - port: 80
+  selector:
+    run: php-apache
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: http-app-autoscaler
+  name: php-apache
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: http-app
+    name: php-apache
   minReplicas: 1
   maxReplicas: 10
   metrics:
   - type: Resource
     resource:
       name: memory
-      targetAverageUtilization: 80
+      target:
+        type: Utilization
+        averageUtilization: 60
+:wq
+====================================
 
+# Workload Management - Node & Pod Affinity.
+
+vi wm7.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: gpu
+                operator: In
+                values:
+                - "true"
+      containers:
+      - name: my-container
+        image: nginx:latest
 :wq
 
 
-===================
+vi wm8.yaml
 
-#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - my-app
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: my-container
+        image: centos:latest
+:wq
+
+==================================
+
+Workload Management - Anti Affinity
+
+vi wm9.yaml
+
