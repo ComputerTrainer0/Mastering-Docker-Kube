@@ -264,7 +264,7 @@ vi wm8.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app
+  name: my-app1
 spec:
   replicas: 3
   selector:
@@ -287,7 +287,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: my-container
-        image: centos:latest
+        image: nginx:latest
 :wq
 
 ==================================
