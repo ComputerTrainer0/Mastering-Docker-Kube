@@ -165,9 +165,10 @@ kubectl get pods -n kube-system
 kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
 
 
-#YAML Based HPA
+#YAML Based HPA For Memory:
 
 vi wm6.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -187,7 +188,6 @@ spec:
         ports:
         - containerPort: 80
         resources:
-          limits:
           limits:
             memory: "512Mi"
           requests:
