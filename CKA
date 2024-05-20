@@ -1,0 +1,102 @@
+#Question 1:
+
+vi q1.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ['sh', '-c', 'sleep 3200']
+    securityContext:
+      capabilities:
+        add:
+        - SYS_TIME
+:wq
+
+
+#Question 2:
+
+vi q2.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myproject
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myproject
+  template:
+    metadata:
+      labels:
+        app: myproject
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16
+:wq
+
+kubectl annotate deployment/myproject kubernetes.io/change-cause="image created to 1.16"
+kubectl set image deployment/myproject nginx=nginx:1.17
+kubectl annotate deployment/myproject kubernetes.io/change-cause="image updated to 1.17"
+kubectl rollout status deployment/myproject
+kubectl rollout history deployment/myproject
+
+#Question 3:
+
+vi q3.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-deployment
+  template:
+    metadata:
+      labels:
+        app: my-deployment
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+:wq
+
+
+
+
+Question 4:
+
+
+Question 5:
+
+
+Question 6:
+
+
+Question 7:
+
+
+Question 8:
+
+
+Question 9:
+
+
+Question 10:
+
+
+Question 11:
+
+
+Question 12:
+
+
