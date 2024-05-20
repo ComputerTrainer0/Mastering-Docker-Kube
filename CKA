@@ -71,27 +71,145 @@ spec:
 :wq
 
 
-
-
 Question 4:
+
+vi q4.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-nginx
+  labels:
+    tier: web-app
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.17
+:wq
+
+
+kubectl get pods --selector=tier=web-app
+kubectl describe pod web-nginx
 
 
 Question 5:
 
+vi q5.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: static-pod-nginx
+spec:
+  nodeName: worker1
+  containers:
+  - name: nginx
+    image: nginx
+:wq
+
+
 
 Question 6:
+
+vi q6.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-multi
+spec:
+  containers:
+  - name: container1
+    image: nginx
+  - name: container2
+    image: busybox
+    command: ["sleep", "4800"]
+:wq
+
+
 
 
 Question 7:
 
+vi q7.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  namespace: custom
+  labels:
+    env: test
+    tier: backend
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.17
+
+:wq
 
 Question 8:
+
+kubectl run output-pod --image=busybox --restart=Never -it --rm --restart=Never -- /bin/sh -c 'echo You Have Passed Your CKA Exam' > output-pod.txt
 
 
 Question 9:
 
+vi q9.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+spec:
+  containers:
+  - name: my-app-container
+    image: your-image-name
+    ports:
+    - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 10002
+    targetPort: 80
+  type: ClusterIP
+:wq
+
+
 
 Question 10:
+
+vi q10.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+spec:
+  containers:
+  - name: my-app-container
+    image: your-image-name
+    ports:
+    - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 10002
+    nodePort: 10002
+    targetPort: 80
+  type: ClusterIP
+:wq
 
 
 Question 11:
