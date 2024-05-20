@@ -128,7 +128,6 @@ spec:
 
 
 
-
 Question 7:
 
 vi q7.yaml
@@ -147,6 +146,8 @@ spec:
 
 :wq
 
+kubectl create namespace custom
+
 Question 8:
 
 kubectl run output-pod --image=busybox --restart=Never -it --rm --restart=Never -- /bin/sh -c 'echo You Have Passed Your CKA Exam' > output-pod.txt
@@ -162,7 +163,7 @@ metadata:
 spec:
   containers:
   - name: my-app-container
-    image: your-image-name
+    image: nginx
     ports:
     - containerPort: 80
 ---
@@ -175,9 +176,10 @@ spec:
     app: my-app
   ports:
   - protocol: TCP
-    port: 10002
+    port: 30010
+    nodePort: 30010
     targetPort: 80
-  type: ClusterIP
+  type: LoadBalancer
 :wq
 
 
