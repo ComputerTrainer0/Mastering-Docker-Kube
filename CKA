@@ -186,35 +186,12 @@ spec:
 
 Question 10:
 
-vi q10.yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: my-app
-spec:
-  containers:
-  - name: my-app-container
-    image: your-image-name
-    ports:
-    - containerPort: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: my-app-service
-spec:
-  selector:
-    app: my-app
-  ports:
-  - protocol: TCP
-    port: 10002
-    nodePort: 10002
-    targetPort: 80
-  type: ClusterIP
-:wq
+kubectl get nodes worker1 -o json > node-info.json
 
 
 Question 11:
+
+kubectl  get nodes  -o jsonpath='{.items[*].metadata.labels.kubernetes\.io/hostname}' -o jsonpath='{.items[*].status.nodeInfo.osImage}'
 
 
 Question 12:
