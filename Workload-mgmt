@@ -292,7 +292,125 @@ spec:
 
 ==================================
 
-Workload Management - Anti Affinity
+Workload Management - Node Affinity (preferred)
 
 vi wm9.yaml
 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels: 
+    app: webapp
+    append: backend
+    env: prod
+spec:
+  containers:
+  - name: my-container
+    image: nginx:latest
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: region
+            operator: In
+            values:
+            - us-west-1
+      - weight: 2
+        preference:
+          matchExpressions:
+          - key: disktype
+            operator: In
+            values:
+            - ssd
+      - weight: 3
+        preference:
+          matchExpressions:
+          - key: gpu
+            operator: In
+            values:
+            - "true"
+:wq
+
+
+#Workload Management - Pod Affinity (preferred)
+
+vi wm10.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-preferred-affinity-pod
+spec:
+  containers:
+  - name: my-tomcat-comtainer
+    image: tomcat
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - webapp
+          topologyKey: "kubernetes.io/hostname"
+      - weight: 2
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - backend
+          topologyKey: "failure-domain.beta.kubernetes.io/zone"
+
+:wq
+
+
+
+#Workload Management - Pod Affinity (Required & preferred)
+
+vi wm11.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels: 
+    app: webapp
+    append: backend
+    env: prod
+spec:
+  containers:
+  - name: my-container
+    image: nginx:latest
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disktype
+            operator: In
+            values:
+            - ssd
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: region
+            operator: In
+            values:
+            - us-west-1
+      - weight: 2
+        preference:
+          matchExpressions:
+          - key: gpu
+            operator: In
+            values:
+            - "true"
+:wq
