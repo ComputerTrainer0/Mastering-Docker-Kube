@@ -197,3 +197,17 @@ kubectl  get nodes  -o jsonpath='{.items[*].metadata.labels.kubernetes\.io/hostn
 Question 12:
 
 
+vi q12.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-demo
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /pv/host-data
+:wq
+
