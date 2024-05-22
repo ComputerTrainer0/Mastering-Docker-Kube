@@ -414,3 +414,126 @@ spec:
             values:
             - "true"
 :wq
+
+
+#Workload Management - Node Anti Affinity (Required)
+
+vi wm12.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-required-anti-affinity-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disktype
+            operator: NotIn
+            values:
+            - hdd
+          - key: region
+            operator: NotIn
+            values:
+            - us-east-1
+:wq
+
+
+#Workload Management - pod Anti Affinity (Required During Scheduling)
+
+vi wm13.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-required-pod-anti-affinity-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - frontend
+        topologyKey: "kubernetes.io/hostname"
+
+:wq
+
+
+#Workload Management - Node Anti Affinity (Preferred During Scheduling)
+
+vi wm14.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-preferred-node-anti-affinity-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: disktype
+            operator: NotIn
+            values:
+            - hdd
+      - weight: 2
+        preference:
+          matchExpressions:
+          - key: region
+            operator: NotIn
+            values:
+            - us-east-1
+
+:wq
+
+
+#Workload Management - Pod Anti Affinity (Preferred During Scheduling)
+
+vi wm15.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-preferred-pod-anti-affinity-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - frontend
+          topologyKey: "kubernetes.io/hostname"
+      - weight: 2
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - backend
+          topologyKey: "kubernetes.io/hostname"
+:wq
