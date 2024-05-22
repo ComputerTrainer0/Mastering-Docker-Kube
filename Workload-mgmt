@@ -537,3 +537,179 @@ spec:
               - backend
           topologyKey: "kubernetes.io/hostname"
 :wq
+
+
+#workload Management - Taints and Tolerations (NoSchedule)
+
+kubectl taint nodes worker1 color=blue:NoSchedule
+kubectl taint nodes worker2 color=green:NoSchedule
+
+vi wm16.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deploy-v1.16
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-pod-v1.16
+  template:
+    metadata:
+      labels:
+        app: app-pod-v1.16
+    spec:
+      containers:
+      - name: my-nginx-1.16
+        image: nginx:1.16
+      tolerations:
+      - key: "color"
+        operator: "Equal"
+        value: "blue"
+        effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-v1.16-service
+spec:
+  selector:
+    app: app-pod-v1.16
+  ports:
+  - protocol: TCP
+    port: 80
+    nodePort:81
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
+
+vi wm17.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deploy-v1.17
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-pod-v1.17
+  template:
+    metadata:
+      labels:
+        app: app-pod-v1.17
+    spec:
+      containers:
+      - name: my-nginx-1.17
+        image: nginx:1.17
+      tolerations:
+      - key: "color"
+        operator: "Equal"
+        value: "green"
+        effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-v1.17-service
+spec:
+  selector:
+    app: app-pod-v1.17
+  ports:
+  - protocol: TCP
+    port: 80
+    nodePort:81
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
+
+
+#workload Management - Taints and Tolerations (NoExecute)
+
+kubectl taint nodes worker1 color=blue:NoExecute
+kubectl taint nodes worker2 color=green:NoExecute
+
+vi wm18.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deploy-v1.16
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-pod-v1.16
+  template:
+    metadata:
+      labels:
+        app: app-pod-v1.16
+    spec:
+      containers:
+      - name: my-nginx-1.16
+        image: nginx:1.16
+      tolerations:
+      - key: "color"
+        operator: "Equal"
+        value: "blue"
+        effect: "NoExecute"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-v1.16-service
+spec:
+  selector:
+    app: app-pod-v1.16
+  ports:
+  - protocol: TCP
+    port: 80
+    nodePort:81
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
+
+vi wm19.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deploy-v1.17
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app-pod-v1.17
+  template:
+    metadata:
+      labels:
+        app: app-pod-v1.17
+    spec:
+      containers:
+      - name: my-nginx-1.17
+        image: nginx:1.17
+      tolerations:
+      - key: "color"
+        operator: "Equal"
+        value: "green"
+        effect: "NoExecute"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-v1.17-service
+spec:
+  selector:
+    app: app-pod-v1.17
+  ports:
+  - protocol: TCP
+    port: 80
+    nodePort:81
+    targetPort: 80
+  type: LoadBalancer
+:wq
+
