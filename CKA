@@ -211,3 +211,602 @@ spec:
     path: /pv/host-data
 :wq
 
+
+Question: 13
+
+vi q13.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginxapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.18
+:wq
+
+
+Question: 14
+
+# Create the template from kubectl
+kubectl -n ns-nginx create deployment nginx-deploy --replicas=3 --image=nginx:1.22 --dry-run=client -o yaml > nginx-deploy.yaml
+
+kubectl create ns ns-nginx
+kubectl apply -f nginx-deploy.yaml
+kubectl -n ns-nginx rollout status deployment/nginx-deploy
+kubectl -n ns-nginx get deploy
+kubectl -n ns-nginx get pods -o wide
+
+
+Question: 15
+
+Troubleshooting. Please check the video
+
+Question: 16
+
+Troubleshooting. Please check the video
+
+Question: 17
+
+$ kubectl get nodes
+$ kubectl taint node node01 env_type=production:NoSchedule
+$ kubectl describe nodes node01 | grep -i taint
+$ kubectl run dev-redis --image=redis:alpine --dyn-run=client -o yaml > pod-redis.yaml
+$ vi prod-redis.yaml
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: prod-redis 
+spec:
+  containers:
+  - name:  prod-redis 
+    image:  redis:alpine
+  tolerations:
+  - effect: Noschedule 
+    key: env_type 
+    operator: Equal 
+    value: prodcution
+$ kubectl create -f prod-redis.yaml
+
+
+Question: 18
+
+vi q18.yaml
+
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name:  non-root-pod 
+spec:
+  securityContext: 
+    runAsUser:  1000
+    fsGroup:  2000 
+  containers:
+  -  name:  non-root-pod
+:wq
+
+
+
+Question: 19
+
+pv-pod.yaml:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pv-pod
+  name: pv-pod
+spec:
+  containers:
+  - image: busybox:latest
+    name: pv-pod
+    args:
+      - sleep
+      - "3600"
+    volumeMounts:
+    - name: data
+      mountPath: "/data"
+  volumes:
+  - name: data
+    hostPath:
+      path: "/home/ubuntu/data/"
+
+# Create directory and file inside it on worker nodes
+mkdir /home/ubuntu/data
+touch data/file
+
+kubectl apply -f pv-pod.yaml
+kubectl exec pv-pod -- ls /data
+
+
+
+Question 20:
+
+
+pv-data.yaml:
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-data
+spec:
+  storageClassName: "local"
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/ubuntu/data"
+
+
+pvc-data.yaml:
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-data
+spec:
+  storageClassName: "local"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+
+pvc-pod.yaml:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pvc-pod
+  name: pvc-pod
+spec:
+  containers:
+  - image: busybox:latest
+    name: pvc-pod
+    args:
+      - sleep
+      - "3600"
+    volumeMounts:
+    - name: data
+      mountPath: "/data"
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: pvc-data
+
+kubectl apply -f pv-data.yaml
+kubectl apply -f pvc-data.yaml
+kubectl apply -f pvc-pod.yaml
+kubectl get pv
+kubectl get pvc
+kubectl exec pvc-pod -- ls /data/
+kubectl exec pvc-pod -- touch /data/file2
+kubectl delete -f pvc-pod.yaml
+kubectl apply -f pvc-pod-2.yaml
+kubectl exec pvc-pod-2 -- ls /data/
+
+
+Question 21:
+
+
+kubectl -n ns-nginx scale deployment nginx-deploy --replicas=5
+kubectl -n ns-nginx rollout status deployment nginx-deploy
+kubectl -n ns-nginx get deploy
+kubectl -n ns-nginx get pods -o wide
+kubectl -n ns-nginx edit deployment/nginx-deploy
+kubectl -n ns-nginx get replicaset
+kubectl -n ns-nginx get pods -o wide
+
+
+Questions 22:
+
+kubectl -n ns-nginx rollout history deployment nginx-deploy
+kubectl -n ns-nginx rollout undo deployment nginx-deploy
+kubectl -n ns-nginx get replicaset
+kubectl -n ns-nginx get pods -o wide
+kubectl -n ns-nginx get pods nginx-deploy-57767fb8cf-zklv4 -o jsonpath='{.spec.containers[0].image}'
+
+
+Questions 23:
+
+vi q23.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: envvar
+  name: envvar
+spec:
+  containers:
+  - image: busybox:latest
+    name: envvar
+    args:
+      - sleep
+      - "3600"
+    env:
+      - name: PLANET
+        value: "blue"
+:wq
+
+kubectl apply -f envvar.yaml
+kubectl exec envvar -- env | grep PLANET
+
+
+Question 24:
+
+kubectl create configmap space --from-literal=planet=blue --from-literal=moon=white
+
+vi q24.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: configenvvar
+  name: configenvvar
+spec:
+  containers:
+  - image: busybox:latest
+    name: configenvvar
+    args:
+      - sleep
+      - "3600"
+    env:
+      - name: PLANET
+        valueFrom:
+          configMapKeyRef:
+            name: space
+            key: planet
+      - name: MOON
+        valueFrom:
+         configMapKeyRef:
+            name: space
+            key: moon
+:wq
+
+kubectl apply -f configenvvar.yaml
+kubectl exec configenvvar -- env | grep -E "PLANET|MOON"
+
+
+Question 25:
+
+vi system.conf
+planet=blue
+moon=white
+:wq
+
+vi Q25.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: confvolume
+  name: confvolume
+spec:
+  containers:
+  - image: busybox:latest
+    name: confvolume
+    args:
+      - sleep
+      - "3600"
+    volumeMounts:
+      - name: system
+        mountPath: /etc/system.conf
+        subPath: system.conf
+    resources: {}
+  volumes:
+  - name: system
+    configMap:
+      name: space-system
+:wq
+
+
+kubectl apply -f confvolume.yaml
+kubectl exec confvolume -- cat /etc/system.conf
+
+
+Question 26:
+
+
+echo -n 'admin' > username
+echo -n 'admin-pass' > password
+
+kubectl create secret generic admin-cred --from-file=username --from-file=password
+
+vi q26.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: secretenv
+  name: secretenv
+spec:
+  containers:
+  - image: busybox:latest
+    name: secretenv
+    args:
+      - sleep
+      - "3600"
+    env:
+      - name: USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: admin-cred
+            key: username
+      - name: PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: admin-cred
+            key: password
+:wq
+
+kubectl apply -f secretenv.yaml
+kubectl exec secretenv -- env | grep -E "USERNAME|PASSWORD"
+
+
+vi 26-1.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: secretvolume
+  name: secretvolume
+spec:
+  containers:
+  - image: busybox:latest
+    name: secretvolume
+    args:
+      - sleep
+      - "3600"
+    volumeMounts:
+      - name: admincred
+        mountPath: /etc/admin-cred
+        readOnly: true
+  volumes:
+  - name: admincred
+    secret:
+      secretName: admin-cred
+:wq
+
+kubectl apply -f secretvolume.yaml
+kubectl exec secretvolume -- ls /etc/admin-cred
+kubectl exec secretvolume -- cat /etc/admin-cred/username
+kubectl exec secretvolume -- cat /etc/admin-cred/password
+
+
+
+
+Question 27
+
+kubectl create deployment scalable --image=nginx:latest
+kubectl get deployment
+kubectl scale deployment scalable --replicas=4
+kubectl get deployment
+kubectl get pods -o wide
+
+
+
+Question 28
+
+vi 28.yaml
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    type: daemon
+  name: daemontest
+spec:
+  selector:
+    matchLabels:
+      run: daemon
+  template:
+    metadata:
+      labels:
+        run: daemon
+      name: daemonpod
+    spec:
+      containers:
+      - image: busybox:latest
+        name: daemonpod
+        args:
+          - sleep
+          - "3600"
+:wq
+
+kubectl apply -f daemonset.yaml
+kubectl get pods -o wide
+
+
+
+Question 29:
+
+
+vi q29.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: podquota
+  name: podquota
+spec:
+  containers:
+  - image: busybox:latest
+    name: podquota
+    args:
+      - sleep
+      - "3600"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+:wq
+
+
+kubectl apply -f podquota.yaml
+kubectl describe pod podquota
+
+
+Question 30:
+
+vi q30.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: podsel
+  name: podsel
+spec:
+  containers:
+  - image: busybox:latest
+    name: podsel
+    args:
+      - sleep
+      - "3600"
+  nodeSelector:
+    kind: special
+:wq
+
+kubectl label nodes k8s-node-1 kind=special
+kubectl apply -f pod-selector.yaml
+kubectl get pods -o wide
+
+
+Question 31:
+
+vi q31.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: podaff
+  name: podaff
+spec:
+  containers:
+  - image: busybox:latest
+    name: podaff
+    args:
+      - sleep
+      - "3600"
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: run
+                operator: In
+                values:
+                  - podsel #Need to create this pod before you run
+          topologyKey: kubernetes.io/hostname
+:wq
+
+kubectl apply -f pod-antiaffinity.yaml
+kubectl get pods -o wide
+
+
+Question 32:
+
+
+vi q32.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: podtol
+  name: podtol
+spec:
+  containers:
+  - image: busybox:latest
+    name: podtol
+    args:
+      - sleep
+      - "3600"
+  tolerations:
+  - key: "type"
+    operator: "Equal"
+    value: "special"
+    effect: "NoSchedule"
+:wq
+
+kubectl taint node worker1 type=special:NoSchedule
+kubectl cordon worker2
+kubectl apply -f q32.yaml
+kubectl get pods -o wide
+kubectl uncordon worker2
+kubectl taint node k8s-node-1 type=special:NoSchedule- 
+
+
+
+Question 33:
+
+vi q33.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: podnode
+  name: podnode
+spec:
+  containers:
+  - image: busybox:latest
+    name: podnode
+    args:
+      - sleep
+      - "3600"
+  nodeName: worker2
+:wq
+
+kubectl get pods -o wide
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
