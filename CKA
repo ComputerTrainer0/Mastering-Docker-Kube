@@ -238,45 +238,37 @@ spec:
 
 Question: 14
 
-# Create the template from kubectl
-kubectl -n ns-nginx create deployment nginx-deploy --replicas=3 --image=nginx:1.22 --dry-run=client -o yaml > nginx-deploy.yaml
-
 kubectl create ns ns-nginx
-kubectl apply -f nginx-deploy.yaml
+kubectl -n ns-nginx create deployment nginx-deploy --replicas=3 --image=nginx:1.22
 kubectl -n ns-nginx rollout status deployment/nginx-deploy
 kubectl -n ns-nginx get deploy
 kubectl -n ns-nginx get pods -o wide
+
 
 
 Question: 15
 
 Troubleshooting. Please check the video
 
+
 Question: 16
 
 Troubleshooting. Please check the video
 
+
 Question: 17
 
-$ kubectl get nodes
-$ kubectl taint node node01 env_type=production:NoSchedule
-$ kubectl describe nodes node01 | grep -i taint
-$ kubectl run dev-redis --image=redis:alpine --dyn-run=client -o yaml > pod-redis.yaml
-$ vi prod-redis.yaml
-apiVersion: v1 
-kind: Pod 
-metadata:
-  name: prod-redis 
-spec:
-  containers:
-  - name:  prod-redis 
-    image:  redis:alpine
-  tolerations:
-  - effect: Noschedule 
-    key: env_type 
-    operator: Equal 
-    value: prodcution
-$ kubectl create -f prod-redis.yaml
+kubectl  create deployment nginx-deploy --replicas=1 --image=nginx:1.22
+kubectl describe pod/nginx-deploy-7455bbdd-b44jd
+kubectl  describe nodes worker1 |grep -i taint
+kubectl  describe nodes worker2 |grep -i taint
+kubectl edit deployment.apps/nginx-deploy
+
+      tolerations:
+      - effect: NoExecute
+        key: color
+        operator: Equal
+        value: blue
 
 
 Question: 18
