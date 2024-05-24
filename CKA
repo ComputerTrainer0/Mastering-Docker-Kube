@@ -255,9 +255,6 @@ Question: 16
 
 Troubleshooting. Please check the video
 
-
-Question: 17
-
 kubectl  create deployment nginx-deploy --replicas=1 --image=nginx:1.22
 kubectl describe pod/nginx-deploy-7455bbdd-b44jd
 kubectl  describe nodes worker1 |grep -i taint
@@ -269,6 +266,41 @@ kubectl edit deployment.apps/nginx-deploy
         key: color
         operator: Equal
         value: blue
+
+
+
+Question: 17
+
+
+kubectl taint nodes worker1 key=unschedulable:NoSchedule
+
+vi q17.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dev-redis
+spec:
+  containers:
+  - name: redis
+    image: redis:alpine
+:wq
+
+vi q17-1.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prod-redis
+spec:
+  containers:
+  - name: redis
+    image: redis:alpine
+  tolerations:
+  - key: "key"
+    operator: "Equal"
+    value: "unschedulable"
+    effect: "NoSchedule"
+:wq
 
 
 Question: 18
