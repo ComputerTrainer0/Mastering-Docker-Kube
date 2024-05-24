@@ -323,32 +323,26 @@ spec:
 
 Question: 19
 
-pv-pod.yaml:
+q19.yaml:
 
 apiVersion: v1
 kind: Pod
 metadata:
-  labels:
-    run: pv-pod
-  name: pv-pod
+  name: hostpath-pod
 spec:
   containers:
-  - image: busybox:latest
-    name: pv-pod
-    args:
-      - sleep
-      - "3600"
+  - name: test-container
+    image: busybox
+    command: [ "sh", "-c", "sleep 3600" ]
     volumeMounts:
-    - name: data
-      mountPath: "/data"
+    - mountPath: /data
+      name: hostpath-volume
   volumes:
-  - name: data
+  - name: hostpath-volume
     hostPath:
-      path: "/home/ubuntu/data/"
-
-# Create directory and file inside it on worker nodes
-mkdir /home/ubuntu/data
-touch data/file
+      path: /pv/host-data/
+      type: Directory
+:wq
 
 kubectl apply -f pv-pod.yaml
 kubectl exec pv-pod -- ls /data
@@ -358,7 +352,7 @@ kubectl exec pv-pod -- ls /data
 Question 20:
 
 
-pv-data.yaml:
+q20.yaml:
 
 apiVersion: v1
 kind: PersistentVolume
@@ -371,10 +365,10 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/home/ubuntu/data"
+    path: "/pv/host-data/"
 
 
-pvc-data.yaml:
+q20-1.yaml:
 
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -389,7 +383,7 @@ spec:
       storage: 1Gi
 
 
-pvc-pod.yaml:
+q20-2.yaml:
 
 apiVersion: v1
 kind: Pod
@@ -411,6 +405,7 @@ spec:
   - name: data
     persistentVolumeClaim:
       claimName: pvc-data
+:wq
 
 kubectl apply -f pv-data.yaml
 kubectl apply -f pvc-data.yaml
@@ -427,22 +422,22 @@ kubectl exec pvc-pod-2 -- ls /data/
 Question 21:
 
 
-kubectl -n ns-nginx scale deployment nginx-deploy --replicas=5
-kubectl -n ns-nginx rollout status deployment nginx-deploy
-kubectl -n ns-nginx get deploy
-kubectl -n ns-nginx get pods -o wide
-kubectl -n ns-nginx edit deployment/nginx-deploy
-kubectl -n ns-nginx get replicaset
-kubectl -n ns-nginx get pods -o wide
+kubectl scale deployment nginx-deploy --replicas=5
+kubectl rollout status deployment nginx-deploy
+kubectl get deploy
+kubectl get pods -o wide
+kubectl edit deployment/nginx-deploy
+kubectl get replicaset
+kubectl get pods -o wide
 
 
 Questions 22:
 
-kubectl -n ns-nginx rollout history deployment nginx-deploy
-kubectl -n ns-nginx rollout undo deployment nginx-deploy
-kubectl -n ns-nginx get replicaset
-kubectl -n ns-nginx get pods -o wide
-kubectl -n ns-nginx get pods nginx-deploy-57767fb8cf-zklv4 -o jsonpath='{.spec.containers[0].image}'
+kubectl rollout history deployment nginx-deploy
+kubectl rollout undo deployment nginx-deploy
+kubectl get replicaset
+kubectl get pods -o wide
+kubectl get pods nginx-deploy-57767fb8cf-zklv4 -o jsonpath='{.spec.containers[0].image}'
 
 
 Questions 23:
