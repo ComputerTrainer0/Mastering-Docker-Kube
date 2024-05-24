@@ -462,7 +462,7 @@ spec:
         value: "blue"
 :wq
 
-kubectl apply -f envvar.yaml
+kubectl apply -f q23.yaml
 kubectl exec envvar -- env | grep PLANET
 
 
@@ -486,20 +486,20 @@ spec:
       - sleep
       - "3600"
     env:
-      - name: PLANET
+      - name: planet
         valueFrom:
           configMapKeyRef:
             name: space
             key: planet
-      - name: MOON
+      - name: moon
         valueFrom:
          configMapKeyRef:
             name: space
             key: moon
 :wq
 
-kubectl apply -f configenvvar.yaml
-kubectl exec configenvvar -- env | grep -E "PLANET|MOON"
+kubectl apply -f q24.yaml
+kubectl exec configenvvar -- env | grep -E "planet|moon"
 
 
 Question 25:
@@ -535,8 +535,8 @@ spec:
       name: space-system
 :wq
 
-
-kubectl apply -f confvolume.yaml
+kubectl create configmap space-system --from-file=system.conf
+kubectl apply -f q25.yaml
 kubectl exec confvolume -- cat /etc/system.conf
 
 
@@ -564,19 +564,18 @@ spec:
       - sleep
       - "3600"
     env:
-      - name: USERNAME
+      - name: username
         valueFrom:
           secretKeyRef:
             name: admin-cred
             key: username
-      - name: PASSWORD
+      - name: password
         valueFrom:
           secretKeyRef:
             name: admin-cred
             key: password
 :wq
 
-kubectl apply -f secretenv.yaml
 kubectl exec secretenv -- env | grep -E "USERNAME|PASSWORD"
 
 
@@ -605,11 +604,9 @@ spec:
       secretName: admin-cred
 :wq
 
-kubectl apply -f secretvolume.yaml
 kubectl exec secretvolume -- ls /etc/admin-cred
 kubectl exec secretvolume -- cat /etc/admin-cred/username
 kubectl exec secretvolume -- cat /etc/admin-cred/password
-
 
 
 
@@ -683,8 +680,6 @@ spec:
         cpu: "1"
 :wq
 
-
-kubectl apply -f podquota.yaml
 kubectl describe pod podquota
 
 
@@ -709,8 +704,8 @@ spec:
     kind: special
 :wq
 
-kubectl label nodes k8s-node-1 kind=special
-kubectl apply -f pod-selector.yaml
+kubectl label nodes worker1 kind=special
+kubectl apply -f q30.yaml
 kubectl get pods -o wide
 
 
@@ -743,7 +738,7 @@ spec:
           topologyKey: kubernetes.io/hostname
 :wq
 
-kubectl apply -f pod-antiaffinity.yaml
+kubectl apply -f q31.yaml
 kubectl get pods -o wide
 
 
@@ -777,7 +772,7 @@ kubectl cordon worker2
 kubectl apply -f q32.yaml
 kubectl get pods -o wide
 kubectl uncordon worker2
-kubectl taint node k8s-node-1 type=special:NoSchedule- 
+kubectl taint node worker1 type=special:NoSchedule- 
 
 
 
