@@ -19,7 +19,7 @@ metadata:
 
 =================
 
-vi deployment.yaml
+vi dev.yaml
 
 apiVersion: apps/v1
 kind: Deployment
@@ -70,6 +70,12 @@ spec:
     nodePort: 30001
   type: NodePort
 ---
+
+:wq
+
+
+test.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -118,6 +124,12 @@ spec:
     targetPort: 80
     nodePort: 30002
   type: NodePort
+
+:wq
+
+
+prod.yaml
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -166,4 +178,5 @@ spec:
     nodePort: 30003
   type: NodePort
 :wq
+
 
