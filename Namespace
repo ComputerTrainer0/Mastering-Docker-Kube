@@ -1,0 +1,169 @@
+
+vi namspace.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+:wq
+
+=================
+
+vi deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: dev
+  labels:
+    app: nginx
+    environment: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      environment: dev
+  template:
+    metadata:
+      labels:
+        app: nginx
+        environment: dev
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: host-volume
+      volumes:
+      - name: host-volume
+        hostPath:
+          path: /pv/host-data/dev
+      nodeSelector:
+        kubernetes.io/hostname: worker1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: dev
+spec:
+  selector:
+    app: nginx
+    environment: dev
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30001
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: test
+  labels:
+    app: nginx
+    environment: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      environment: test
+  template:
+    metadata:
+      labels:
+        app: nginx
+        environment: test
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: host-volume
+      volumes:
+      - name: host-volume
+        hostPath:
+          path: /pv/host-data/test
+      nodeSelector:
+        kubernetes.io/hostname: worker2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: test
+spec:
+  selector:
+    app: nginx
+    environment: test
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30002
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: prod
+  labels:
+    app: nginx
+    environment: prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+      environment: prod
+  template:
+    metadata:
+      labels:
+        app: nginx
+        environment: prod
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: host-volume
+      volumes:
+      - name: host-volume
+        hostPath:
+          path: /pv/host-data/prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: prod
+spec:
+  selector:
+    app: nginx
+    environment: prod
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30003
+  type: NodePort
+:wq
+
