@@ -4,7 +4,13 @@ All software Opensource available. All My trainings on UDMEY for a MAX DISCOUNTE
 
 New Released course:
 
+Mastering Weblogic 12/14C - Basic To Expert + Docker
+https://www.udemy.com/course/weblogic14/?referralCode=9668ADCD426B0CC6EBB8
+
 Mastering Docker & Kubernetes - Basic To Expert - https://www.udemy.com/course/docker-expert/?referralCode=7241FFBE6A67EA7E5E64
+
+JBOSS EAP Basics - Admin's Guide
+https://www.udemy.com/course/jboss-eap-basics-admins-guide/?referralCode=AF1A8D9BFB401BA9894C
 
 Certification Pratice Test:
 
