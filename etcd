@@ -1,0 +1,51 @@
+#Working with ETCD
+
+cd /op  sUnderstanding the key values in the below:
+
+etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt get "" --prefix --keys-only
+
+etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt get "" --prefix --keys-only |deployment
+
+kubectl describe deployment.apps/nginx-deployment -n dev
+
+etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt get /registry/deployments/dev/nginx-deployment
+
+# Create you own Key entry:
+
+etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt put foo "Hello, world!"
+
+etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt get foo
+
+
+#watch mode:
+etcdctl --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert=/etc/kubernetes/pki/etcd/ca.crt watch --prefix /registry/deployments/
+
+
+#Split-Brain:
+
+etcdctl --endpoints=https://127.0.0.1:2379,https://127.0.0.2:2379  --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key endpoint health
+
+etcdctl --endpoints=https://127.0.0.1:2379,https://172.24.0.200:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key endpoint status --write-out=table
+
+
+
+
+#To Backup:
+
+ETCDCTL_API=3 etcdctl --endpoints=https://172.24.0.200:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /tmp/snapshot.db
+
+
+
+#To restore:
+
+rm -rf /var/lib/etcd
+
+ETCDCTL_API=3 etcdctl --endpoints=https://172.24.0.200:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+     --name=manager1 \
+     --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key \
+     --data-dir=/var/lib/etcd \
+     --initial-cluster=manager1=https://172.24.0.200:2380 \
+     --initial-cluster-token etcd-cluster-1 \
+     --initial-advertise-peer-urls=https://172.24.0.200:2380 \
+     snapshot restore /tmp/snapshot.db
+
