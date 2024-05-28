@@ -120,7 +120,7 @@ spec:
     environment: test
   ports:
   - protocol: TCP
-    port: 80
+    port: 81
     targetPort: 80
     nodePort: 30002
   type: NodePort
@@ -130,7 +130,6 @@ spec:
 
 prod.yaml
 
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -173,7 +172,7 @@ spec:
     environment: prod
   ports:
   - protocol: TCP
-    port: 80
+    port: 82
     targetPort: 80
     nodePort: 30003
   type: NodePort
