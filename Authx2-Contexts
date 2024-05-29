@@ -38,29 +38,131 @@ kubectl config delete-cluster dev-cluster
 kubectl config delete-context dev-context 
 
 
+kubectl config use-context kubernetes-admin@kubernetes
+kubectl config get-clusters
+kubectl config get-users
+kubectl config get-contexts
 
 
+vi dev_admin_ns_role.yaml
 
-1103  kubectl config get-clusters
- 1104  kubectl config get-users
- 1105  kubectl config get-contexts
- 1106  ping dev-cluster.example.com
- 1107  vi /etc/kubernetes/admin.conf
- 1108  kubectl config current-contexts
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev
+  name: dev-namespace-admin
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+:wq
 
-TO Be Deleted:
+vi dev_admin_ns_binding.yaml
 
-kubectl config set-cluster dev-cluster --server=https://dev-cluster.example.com --certificate-authority=ca.crt
-kubectl config set-cluster test-cluster --server=https://test-cluster.example.com --certificate-authority=ca.crt
-kubectl config set-cluster prod-cluster --server=https://prod-cluster.example.com --certificate-authority=ca.crt
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: dev
+  name: dev-namespace-admin-binding
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: dev-namespace-admin
+  apiGroup: rbac.authorization.k8s.io
+
+:wq
 
 
-openssl genrsa -out dev-cluster.key 2048
-openssl req -new -key dev-cluster.key -subj "/CN=kube-apiserver" -out dev-cluster.csr
-openssl x509 -req -in dev-cluster.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out dev-cluster.crt -days 10000
-openssl genrsa -out test-cluster.key 2048
-openssl req -new -key test-cluster.key -subj "/CN=kube-apiserver" -out test-cluster.csr
-openssl x509 -req -in test-cluster.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out test-cluster.crt -days 10000
-openssl genrsa -out prod-cluster.key 2048
-openssl req -new -key prod-cluster.key -subj "/CN=kube-apiserver" -out prod-cluster.csr
-openssl x509 -req -in prod-cluster.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out prod-cluster.crt -days 10000
+vi test_admin_ns_role.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: test
+  name: test-namespace-admin
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+:wq
+
+vi test_admin_ns_binding.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: test
+  name: test-namespace-admin-binding
+subjects:
+- kind: User
+  name: test-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: test-namespace-admin
+  apiGroup: rbac.authorization.k8s.io
+
+:wq
+
+
+vi prod_admin_ns_role.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: prod
+  name: prod-namespace-admin
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+:wq
+
+vi prod_admin_ns_binding.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: prod
+  name: prod-namespace-admin-binding
+subjects:
+- kind: User
+  name: prod-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: prod-namespace-admin
+  apiGroup: rbac.authorization.k8s.io
+
+:wq
+
