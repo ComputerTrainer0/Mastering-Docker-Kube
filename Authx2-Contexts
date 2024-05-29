@@ -1,0 +1,66 @@
+
+openssl genrsa -out ca.key 2048
+openssl req -x509 -new -nodes -key ca.key -subj "/CN=kube-ca" -days 10000 -out ca.crt
+
+
+
+#OpenSSL 
+
+openssl genrsa -out dev-user.key 2048
+openssl req -new -key dev-user.key -subj "/CN=dev-user" -out dev-user.csr
+openssl genrsa -out prod-user.key 2048
+openssl req -new -key prod-user.key -subj "/CN=prod-user" -out prod-user.csr
+openssl genrsa -out test-user.key 2048
+openssl req -new -key test-user.key -subj "/CN=test-user" -out test-user.csr
+openssl x509 -req -in prod-user.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out prod-user.crt -days 10000
+openssl x509 -req -in test-user.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out test-user.crt -days 10000
+openssl x509 -req -in dev-user.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out dev-user.crt -days 10000
+
+#Creating context - user - cluster
+
+kubectl config set-credentials dev-user --client-certificate=dev-user.crt --client-key=dev-user.key
+kubectl config set-credentials test-user --client-certificate=test-user.crt --client-key=test-user.key
+kubectl config set-credentials prod-user --client-certificate=prod-user.crt --client-key=prod-user.key
+kubectl config set-context dev-context --cluster=kubernetes --namespace=dev --user=dev-user
+kubectl config set-context test-context --cluster=kubernetes --namespace=test --user=test-user
+kubectl config set-context prod-context --cluster=kubernetes --namespace=prod --user=prod-user
+
+#Deleting
+kubectl config use-context kubernetes
+kubectl config delete-user prod-user
+kubectl config delete-cluster prod-cluster 
+kubectl config delete-context prod-context 
+kubectl config delete-user test-user
+kubectl config delete-cluster test-cluster
+kubectl config delete-context test-context 
+kubectl config delete-user dev-user
+kubectl config delete-cluster dev-cluster
+kubectl config delete-context dev-context 
+
+
+
+
+
+1103  kubectl config get-clusters
+ 1104  kubectl config get-users
+ 1105  kubectl config get-contexts
+ 1106  ping dev-cluster.example.com
+ 1107  vi /etc/kubernetes/admin.conf
+ 1108  kubectl config current-contexts
+
+TO Be Deleted:
+
+kubectl config set-cluster dev-cluster --server=https://dev-cluster.example.com --certificate-authority=ca.crt
+kubectl config set-cluster test-cluster --server=https://test-cluster.example.com --certificate-authority=ca.crt
+kubectl config set-cluster prod-cluster --server=https://prod-cluster.example.com --certificate-authority=ca.crt
+
+
+openssl genrsa -out dev-cluster.key 2048
+openssl req -new -key dev-cluster.key -subj "/CN=kube-apiserver" -out dev-cluster.csr
+openssl x509 -req -in dev-cluster.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out dev-cluster.crt -days 10000
+openssl genrsa -out test-cluster.key 2048
+openssl req -new -key test-cluster.key -subj "/CN=kube-apiserver" -out test-cluster.csr
+openssl x509 -req -in test-cluster.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out test-cluster.crt -days 10000
+openssl genrsa -out prod-cluster.key 2048
+openssl req -new -key prod-cluster.key -subj "/CN=kube-apiserver" -out prod-cluster.csr
+openssl x509 -req -in prod-cluster.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out prod-cluster.crt -days 10000
