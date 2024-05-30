@@ -1,6 +1,10 @@
+----------------------------
+
 Connect me @ beyondcloudai@gmail.com
 
 All software Opensource available. All My trainings on UDMEY for a MAX DISCOUNTED PRICE:
+
+----------------------------
 
 **New Released course:**
 
@@ -10,6 +14,7 @@ Mastering Docker & Kubernetes - Basic To Expert - https://www.udemy.com/course/d
 
 JBOSS EAP Basics - Admin's Guide - https://www.udemy.com/course/jboss-eap-basics-admins-guide/?referralCode=AF1A8D9BFB401BA9894C
 
+----------------------------
 
 **Certification Pratice Test:**
 
@@ -21,6 +26,7 @@ C1000-174: IBM WebSphere Application Server - Pratice Test - https://www.udemy.c
 
 C1000-126 - IBM WebSphere Hybrid Edition - Practice Test - https://www.udemy.com/course/websphere-hybrid-exam/?referralCode=15E8B26F7CB2F4DC693B
 
+----------------------------
 
 **BEST Courses:**
 
@@ -38,3 +44,5 @@ Mastering IBM MQ Administration 9.X - From Novice to Expert - https://www.udemy.
 IBM WebSphere Hybrid Edition - Solution Architect - https://www.udemy.com/course/websphere-hybrid/?referralCode=162A4E036BE71784AEEF
 
 SSL/TLS Automation- Creating, Renewing & Managing Certs - https://www.udemy.com/course/ssl-automation-script/?referralCode=6D3E3445F8EB8E6A5446
+
+----------------------------
