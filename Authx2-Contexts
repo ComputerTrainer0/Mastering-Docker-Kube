@@ -45,7 +45,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: dev
-  name: dev-namespace-admin
+  name: dev-role-admin
 rules:
 - apiGroups: [""]
   resources: ["pods", "services", "configmaps", "secrets"]
@@ -67,7 +67,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: dev
-  name: dev-namespace-admin-binding
+  name: dev-binding-admin
 subjects:
 - kind: User
   name: dev-user
@@ -86,7 +86,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: test
-  name: test-namespace-admin
+  name: test-role-admin
 rules:
 - apiGroups: [""]
   resources: ["pods", "services", "configmaps", "secrets"]
@@ -108,7 +108,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: test
-  name: test-namespace-admin-binding
+  name: test-binding-admin
 subjects:
 - kind: User
   name: test-user
@@ -127,7 +127,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: prod
-  name: prod-namespace-admin
+  name: prod-role-admin
 rules:
 - apiGroups: [""]
   resources: ["pods", "services", "configmaps", "secrets"]
@@ -149,7 +149,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   namespace: prod
-  name: prod-namespace-admin-binding
+  name: prod-binding-admin
 subjects:
 - kind: User
   name: prod-user
