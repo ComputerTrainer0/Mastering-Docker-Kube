@@ -799,6 +799,37 @@ spec:
 kubectl get pods -o wide
 
 
+Labs - Question 34
+
+
+To Backup:
+
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/software/etcd/etcd-snapshot.db
+
+
+
+
+Labs - Question 35
+
+
+#To restore:
+
+
+rm -rf /var/lib/etcd 
+
+
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt    --name=manager1 --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key     --data-dir=/var/lib/etcd --initial-cluster=manager1=https://172.24.0.200:2380 --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls=https://172.24.0.200:2380 snapshot restore /opt/software/etcd/etcd-snapshot.db
+
+
+Labs - Question 36
+
+
+
+
+Labs - Question 37
+
+
+
 
 
 
