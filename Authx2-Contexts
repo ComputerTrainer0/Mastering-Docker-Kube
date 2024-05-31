@@ -74,7 +74,7 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: dev-namespace-admin
+  name: dev-role-admin
   apiGroup: rbac.authorization.k8s.io
 
 :wq
@@ -115,7 +115,7 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: test-namespace-admin
+  name: test-role-admin
   apiGroup: rbac.authorization.k8s.io
 
 :wq
@@ -156,7 +156,7 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: prod-namespace-admin
+  name: prod-role-admin
   apiGroup: rbac.authorization.k8s.io
 
 :wq
