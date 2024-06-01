@@ -1,0 +1,90 @@
+
+#Simulating Older version
+
+vi /etc/yum.repos.d/kubernetes.repo
+edit it to a older version and save the file.
+
+yumdownloader kubelet kubeadm kubectl
+
+Create files for 1.28
+
+Change it to 1.29 on the repo file again.
+
+yumdownloader kubelet kubeadm kubectl
+
+Download files for 1.29.
+
+Note: Remove all the other dist and have only x86_64.
+
+================================
+
+# Upgrading Process - kubeadm
+
+Debian / Ubuntu:
+sudo apt update
+
+Centos:
+yum -y update
+
+
+Debian / Ubuntu:
+sudo apt-mark unhold kubeadm && \
+sudo apt-get update && sudo apt-get install -y kubeadm='1.29.x-*' && \
+sudo apt-mark hold kubeadm
+
+Centos:
+sudo yum install -y kubeadm* --disableexcludes=kubernetes
+
+
+kubeadm version
+sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply <Version>
+
+
+kubectl drain <node-to-drain> --ignore-daemonsets
+
+
+#upgrade Kubectl and Kubelet on Controlplane node
+
+Debian / Ubuntu:
+sudo apt-mark unhold kubelet kubectl && \
+sudo apt-get update && sudo apt-get install -y kubelet='1.30.x-*' kubectl='1.30.x-*' && \
+sudo apt-mark hold kubelet kubectl
+
+Centos:
+sudo yum install -y * --disableexcludes=kubernetes
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+kubectl uncordon <node-to-uncordon>
+
+
+================================
+
+#Upgrade compute plane / data plane - Node1 and Node2: (one by one)
+
+Debian / Ubuntu:
+sudo apt-mark unhold kubeadm && \
+sudo apt-get update && sudo apt-get install -y kubeadm='1.29.x-*' && \
+sudo apt-mark hold kubeadm
+
+Centos:
+sudo yum install -y kubeadm* --disableexcludes=kubernetes
+
+sudo kubeadm upgrade node
+kubectl drain <node-to-drain> --ignore-daemonsets
+
+
+#upgrade Kubectl and Kubelet on computeplane / dataplane node
+
+Debian / Ubuntu:
+sudo apt-mark unhold kubelet kubectl && \
+sudo apt-get update && sudo apt-get install -y kubelet='1.30.x-*' kubectl='1.30.x-*' && \
+sudo apt-mark hold kubelet kubectl
+
+Centos:
+sudo yum install -y * --disableexcludes=kubernetes
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+kubectl uncordon <node-to-uncordon>
