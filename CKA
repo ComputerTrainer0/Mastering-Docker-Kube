@@ -890,6 +890,29 @@ spec:
 Labs - Question 41:
 
 
+kubectl create ns myns
+kubectl run nginx --image=nginx --namespace myns
+
+vi 41.yaml
+
+# Create Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mypolicy
+  namespace: myns
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: myns
+    ports:
+    - protocol: TCP
+      port: 80
 
 
 
