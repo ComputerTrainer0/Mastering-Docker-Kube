@@ -858,11 +858,12 @@ vi q40.yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: netwrok
+  name: network
   namespace: default
 spec:
   podSelector:
-    matchLabels: {} # You can add pod labels to match specific pods if needed
+    matchLabels:
+      app: dev # You can add pod labels to match specific pods if needed
   policyTypes:
   - Ingress
   - Egress
