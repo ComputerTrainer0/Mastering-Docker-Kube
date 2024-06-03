@@ -8,6 +8,8 @@ All software Opensource available. All My trainings on UDMEY for a MAX DISCOUNTE
 
 **New Released course:**
 
+Real CKA Practical Test With Hands-On Explanation - https://www.udemy.com/course/real-cka/?referralCode=709BF1AA2F27CC464A66
+
 Mastering Weblogic 12/14C - Basic To Expert + Docker - https://www.udemy.com/course/weblogic14/?referralCode=9668ADCD426B0CC6EBB8
 
 Mastering Docker & Kubernetes - Basic To Expert - https://www.udemy.com/course/docker-expert/?referralCode=7241FFBE6A67EA7E5E64
