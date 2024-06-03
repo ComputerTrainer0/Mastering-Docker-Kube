@@ -803,38 +803,90 @@ Labs - Question 34
 
 
 To Backup:
-
 ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/software/etcd/etcd-snapshot.db
 
-
+#To restore:
+rm -rf /var/lib/etcd 
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt    --name=manager1 --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key     --data-dir=/var/lib/etcd --initial-cluster=manager1=https://172.24.0.200:2380 --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls=https://172.24.0.200:2380 snapshot restore /opt/software/etcd/etcd-snapshot.db
 
 
 Labs - Question 35
 
+kubectl config get-contexts
+kubectl config get-contexts -o name > /opt/software/cka/cnames
 
-#To restore:
+kubectl config current-context
 
+cat ~/.kube/config | grep current-context
 
-rm -rf /var/lib/etcd 
-
-
-ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt    --name=manager1 --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key     --data-dir=/var/lib/etcd --initial-cluster=manager1=https://172.24.0.200:2380 --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls=https://172.24.0.200:2380 snapshot restore /opt/software/etcd/etcd-snapshot.db
 
 
 Labs - Question 36
 
+kubectl get pod -A --sort-by=.metadata.creationTimestamp
+kubectl get pod -A --sort-by=.metadata.uid
+
+To Get UID
+kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.uid}{"\n"}{end}'
 
 
 
 Labs - Question 37
 
 
+Hands On Check the video please.
 
 
 
+Labs - Question 38
+
+Please refer the git page named "Authx2-Contexts"
 
 
+Labs - Question 39
 
+kubectl run dns-resolve --image=nginx
+kubectl expose pod dns-resolve --name=dns-resolve-service --port=80 --target-port=80 --type=ClusterIP
+kubectl run lookup-pod --image=busybox:1.28 --rm -it --restart=Never -- nslookup dns-resolve-service > /opt/software/cka/nginx.dns
+
+
+Labs - Question 40
+
+vi q40.yaml
+
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: netwrok
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {} # You can add pod labels to match specific pods if needed
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 192.168.1.0/24  # Define the IP range to allow traffic from
+        except:
+        - 192.168.1.10/32    # Define the IP range to exclude from blocking
+    ports:
+    - protocol: TCP
+      port: 6379            # Specify the port for ingress traffic
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.10.10.0/24  # Define the IP range to allow egress traffic to
+    ports:
+    - protocol: TCP
+      port: 5978             # Specify the port for egress traffic
+
+:wq
+
+
+Labs - Question 41:
 
 
 
