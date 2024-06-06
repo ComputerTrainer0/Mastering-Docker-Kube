@@ -1,0 +1,167 @@
+
+#Installation of Nginx Ingress
+
+git clone https://github.com/nginxinc/kubernetes-ingress.git --branch <version_number>
+
+#Creating Infrastructure before Ingress installation: 
+kubectl apply -f deployments/common/ns-and-sa.yaml
+kubectl apply -f deployments/rbac/rbac.yaml
+
+#Creating common resouces which is required for Ingress to work:
+kubectl apply -f examples/shared-examples/default-server-secret/default-server-secret.yaml
+kubectl apply -f deployments/common/nginx-config.yaml
+kubectl apply -f deployments/common/ingress-class.yaml
+
+#Custom Resouce Definisions (CRD). This is the heart of Ingress Configuration.
+kubectl apply -f config/crd/bases/k8s.nginx.org_virtualservers.yaml
+kubectl apply -f config/crd/bases/k8s.nginx.org_virtualserverroutes.yaml
+kubectl apply -f config/crd/bases/k8s.nginx.org_transportservers.yaml
+kubectl apply -f config/crd/bases/k8s.nginx.org_policies.yaml
+kubectl apply -f config/crd/bases/k8s.nginx.org_globalconfigurations.yaml
+
+
+#Nginx Ingress Container deployment & Service creation using Node Port
+
+#For Replication:
+kubectl apply -f deployments/deployment/nginx-ingress.yaml
+kubectl  apply -f deployments/service/nodeport.yaml
+
+
+#For High Availablity:
+kubectl apply -f deployments/daemon-set/nginx-ingress.yaml
+kubectl  apply -f deployments/service/nodeport.yaml
+
+
+kubectl get pods --namespace=nginx-ingress
+
+
+=================
+
+#Host based Example:
+
+vi deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sterling-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sterling-app
+  template:
+    metadata:
+      labels:
+        app: sterling-app
+        env: production
+        type: deployment
+        version: v1
+    spec:
+      containers:
+      - name: os-container
+        image: alpine
+        command: ["/bin/sh"]
+        args: ["-c","while true;do date >> /var/html/index.html; hostname >> /var/html/index.html; sleep 10;done"]
+        volumeMounts:
+        - name: web-volume
+          mountPath: /var/html/
+        readinessProbe:
+          exec:
+            command: ["test","-e","/var/html/index.html"]
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+      - name: nginx
+        image: nginx:latest
+        volumeMounts:
+        - name: web-volume
+          mountPath: /usr/share/nginx/html
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+      - name: tomcat
+        image: tomcat:latest
+        volumeMounts:
+        - name: app-volume
+          mountPath: /usr/local/tomcat/webapps/
+      volumes:
+      - name: web-volume
+        hostPath:
+          path: /pv/host-data/web-data
+      - name: app-volume
+        hostPath:
+          path: /pv/host-data/app-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service1
+spec:
+  type: ClusterIP
+  selector:
+    app: sterling-app
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: ClusterIP
+  selector:
+    app: sterling-app
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+:wq
+
+
+vi ingress-host.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: www.test.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service1
+            port:
+              number: 80
+      - path: /login/
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 8080
+:wq
+
