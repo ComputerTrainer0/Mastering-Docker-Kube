@@ -88,3 +88,20 @@ Creating Config file
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+--------------------------------------------------------------
+
+
+Network Installation:
+
+kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+
+
+--------------------------------------------------------------
+
+Cluster Creation:
+
+sudo kubeadm init
+
+kubeadm token create --print-join-command
