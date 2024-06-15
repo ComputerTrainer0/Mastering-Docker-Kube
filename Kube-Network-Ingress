@@ -37,7 +37,7 @@ kubectl get pods --namespace=nginx-ingress
 
 =================
 
-#Host based Example:
+#Preparation for Ingress:
 
 vi deployment.yaml
 
@@ -136,8 +136,37 @@ spec:
 
 :wq
 
+-----------------------
+
+#HOST based Example:
+
 
 vi ingress-host.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: www.test.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service1
+            port:
+              number: 80
+:wq
+
+-----------------------
+
+#PATH & HOST Based Example:
+
+vi ingress-hostandpath.yaml
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -164,4 +193,3 @@ spec:
             port:
               number: 8080
 :wq
-
