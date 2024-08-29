@@ -8,6 +8,10 @@ All software Opensource available. All My trainings on UDMEY for a MAX DISCOUNTE
 
 **New Released course:**
 
+Next Gen - Weblogic 12/14C - Docker, Kubernetes - https://www.udemy.com/course/nextgen-wls/?referralCode=FC3B493993EB47DA3008
+
+Next Gen - Tomcat On Kubernetes + Prometheus + Grafana + AWS - https://www.udemy.com/course/kube-tomcat/?referralCode=35E043CEF3A3F16BC220
+
 Real CKA Practical Test With Hands-On Explanation - https://www.udemy.com/course/real-cka/?referralCode=709BF1AA2F27CC464A66
 
 Mastering Weblogic 12/14C - Basic To Expert + Docker - https://www.udemy.com/course/weblogic14/?referralCode=9668ADCD426B0CC6EBB8
