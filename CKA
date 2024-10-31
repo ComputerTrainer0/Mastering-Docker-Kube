@@ -307,16 +307,17 @@ Question: 18
 
 vi q18.yaml
 
-apiVersion: v1 
-kind: Pod 
+apiVersion: v1
+kind: Pod
 metadata:
-  name:  non-root-pod 
+  name: non-root-pod
 spec:
-  securityContext: 
-    runAsUser:  1000
-    fsGroup:  2000 
+  securityContext:
+    runAsUser: 1000       # Runs the container as user ID 1000
+    fsGroup: 2000         # Ensures that any files created by the container are owned by group ID 2000
   containers:
-  -  name:  non-root-pod
+  - name: redis
+    image: redis:alpine
 :wq
 
 
